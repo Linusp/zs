@@ -37,7 +37,7 @@ class TelegramConfigManager():
 
     def save(self):
         config_dir = os.path.dirname(self.config_file)
-        if os.path.exists(config_dir):
+        if not os.path.exists(config_dir):
             os.makedirs(config_dir)
 
         with open(self.config_file, 'w') as f:
