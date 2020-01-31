@@ -5,7 +5,12 @@ from setuptools import setup, find_packages
 
 
 VERSION = '0.1.0'
-REQS = []
+REQS = [
+    'click',
+    'pysocks',
+    'telethon',
+    'python-dateutil',
+]
 
 
 setup(
@@ -17,4 +22,7 @@ setup(
     install_requires=REQS,
     include_package_data=True,
     zip_safe=False,
+    entry_points={
+        'console_scripts': ['zs-tg=zs.cli:telegram'],
+    },
 )
