@@ -1,24 +1,16 @@
 zs
 =======
 
-Support Python3 or later
+## Dependencies
 
-## Install
+`python>=3.6`
 
-```shell
-python setup.py install
+## Usage
+
+### zs-tg
+
+`fetch-msgs`:
+
 ```
-
-## Develop
-
-Create virtualenv and install dependencies:
-
-```shell
-make venv && make deps
-```
-
-Unit testing
-
-```shell
-make test
+zs-tg fetch-msgs -n CHATNAME -d "2020-01-01" -l 100 -o messages.json
 ```
