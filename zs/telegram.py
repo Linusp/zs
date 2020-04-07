@@ -319,6 +319,13 @@ class Message():
 
 class TelegramClient():
 
+    IGNORED_MSG_PATTERNS = [
+        re.compile(r'WeChat Slave'),
+        re.compile(r'tele_wechat_bot'),
+        re.compile(r'^/'),
+        re.compile(r'System'),
+    ]
+
     def __init__(self, config_manager=None):
         config_manager = config_manager or TelegramConfigManager()
         if not config_manager.api_id or not config_manager.api_hash:
@@ -407,9 +414,14 @@ class TelegramClient():
                 if cnt > 0:
                     LOGGER.info("processed %d messages and got %d valid messages",
                                 cnt, len(results))
+
+                cnt += 1
+                if isinstance(message.raw_text, str) and \
+                   any(pat.findall(message.raw_text) for pat in self.IGNORED_MSG_PATTERNS):
+                    continue
+
                 offset_id = message.id
                 msg = Message.parse(message, config=self.config_manager)
-                cnt += 1
                 msg_timestamp = message.date
                 if not msg.content:
                     continue
