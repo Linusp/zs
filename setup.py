@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 REQS = [
     'click',
     'pysocks',
@@ -25,4 +25,12 @@ setup(
     entry_points={
         'console_scripts': ['zs-tg=zs.cli:telegram'],
     },
+    classifiers=[
+        'Development Status :: 3 - Alpha',
+        'Intended Audience :: Developers',      # Define that your audience are developers
+        'Topic :: Software Development :: Build Tools',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+    ],
 )
