@@ -207,7 +207,7 @@ class Message():
     def parse_wx_text_message(cls, message):
         # FIXME: 未考虑引用的情况
         user, content = message.raw_text.split('\n', maxsplit=1)
-        user = user.strip(': ')
+        user = user.replace(WX_ARTICLE_PREFIX, '').strip(': ')
         content = content.strip(WX_LINK_PREFIX).strip()
         msg_type = MessageType.WX_TEXT
         return cls(message.id, msg_type, content, message.date, user, None, message)
@@ -254,7 +254,7 @@ class Message():
 
             content = os.path.join(download_path,
                                    f'{message.chat.title}_{message.id}.jpg')
-            if not message.text:
+            if not message.text or message.text.strip() == 'You:':
                 user = 'You'
                 if config and config.user:
                     user = config.user
