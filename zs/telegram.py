@@ -20,7 +20,10 @@ DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, 'telegram.json')
 
 WX_ARTICLE_PREFIX = '💬👤'
 WX_LINK_PREFIX = '🔗'
-WX_CHANNEL_PREFIX = '微信'
+WX_CHANNEL_PREFIX_PATTERN = re.compile(
+    r'(?:^微信)|'
+    r'(?:^tele_wechat_bot$)'
+)
 WX_IMAGE_AUTHOR_PAT = re.compile(r'^(?P<name>.+):\nsent a picture\.$')
 
 
@@ -165,7 +168,7 @@ class Message():
     @staticmethod
     def get_message_type(message):
         chat_name = Message.get_chat_name(message)
-        if chat_name.startswith(WX_CHANNEL_PREFIX):
+        if WX_CHANNEL_PREFIX_PATTERN.match(chat_name):
             return Message.get_wx_message_type(message)
 
         if isinstance(message.photo, Photo) and message.photo.sizes and \
