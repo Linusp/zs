@@ -342,6 +342,7 @@ class TelegramClient():
         re.compile(r'tele_wechat_bot'),
         re.compile(r'^/'),
         re.compile(r'System'),
+        re.compile(r'^Cancelled'),
     ]
 
     def __init__(self, config_manager=None):
