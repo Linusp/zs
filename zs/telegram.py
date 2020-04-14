@@ -206,7 +206,17 @@ class Message():
     @classmethod
     def parse_wx_text_message(cls, message):
         # FIXME: 未考虑引用的情况
-        user, content = message.raw_text.split('\n', maxsplit=1)
+        user = 'unknown'
+        if message.raw_text.find('\n') >= 0:
+            user, content = message.raw_text.split('\n', maxsplit=1)
+        else:
+            matches = WX_GENERAL_AUTHOR_PAT.match(message.raw_text)
+            if matches:
+                user = matches.groupdict()['name'].strip()
+                content = message.raw_text.replace(user, '', 1).strip().strip(':')
+            else:
+                content = message.raw_text
+
         user = user.replace(WX_ARTICLE_PREFIX, '').strip(': ')
         content = content.strip(WX_LINK_PREFIX).strip()
         msg_type = MessageType.WX_TEXT
@@ -252,14 +262,22 @@ class Message():
             else:
                 download_path = TelegramConfigManager.DEFAULT_DOWNLOAD_PATH
 
-            content = os.path.join(download_path,
-                                   f'{message.chat.title}_{message.id}.jpg')
+            if hasattr(message.chat, 'username'):
+                chat_name = message.chat.username
+            else:
+                chat_name = message.chat.title
+
+            content = os.path.join(download_path, f'{chat_name}_{message.id}.jpg')
+
             if not message.text or message.text.strip() == 'You:':
                 user = 'You'
                 if config and config.user:
                     user = config.user
             else:
-                user = WX_IMAGE_AUTHOR_PAT.match(message.text).groupdict()['name']
+                try:
+                    user = WX_IMAGE_AUTHOR_PAT.match(message.text).groupdict()['name']
+                except Exception:
+                    user = 'unknown'
 
             return cls(message.id, msg_type, content, message.date, user, None, message)
 
