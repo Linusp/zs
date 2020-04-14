@@ -49,7 +49,8 @@ def telegram():
 @click.option("-d", "--date", default=str(datetime.date.today()))
 @click.option("-l", "--limit", type=int, default=100)
 @click.option("-o", "--outfile", required=True)
-def fetch_msgs(name, date, limit, outfile):
+@click.option("-t", "--message-type")
+def fetch_msgs(name, date, limit, outfile, message_type):
     """获取某个聊天的消息记录"""
     client = TelegramClient()
 
@@ -57,7 +58,7 @@ def fetch_msgs(name, date, limit, outfile):
     start = start.replace(tzinfo=tz.tzlocal()).astimezone(datetime.timezone.utc)
     messages = [
         msg.to_dict() for msg in
-        client.fetch_messages(name, start=start, limit=limit)
+        client.fetch_messages(name, start=start, limit=limit, msg_type=message_type)
     ]
     with open(outfile, 'w') as fout:
         json.dump(messages, fout, ensure_ascii=False, indent=4)
