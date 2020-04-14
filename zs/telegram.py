@@ -24,7 +24,8 @@ WX_CHANNEL_PREFIX_PATTERN = re.compile(
     r'(?:^微信)|'
     r'(?:^tele_wechat_bot$)'
 )
-WX_IMAGE_AUTHOR_PAT = re.compile(r'^(?P<name>.+):\nsent a picture\.$')
+WX_IMAGE_AUTHOR_PAT = re.compile(r'^(?P<name>.+):\nsent a (?:picture|sticker)\.$')
+WX_GENERAL_AUTHOR_PAT = re.compile(r'^(?P<name>.+):[\n ]+')
 
 
 class TelegramConfigManager():
