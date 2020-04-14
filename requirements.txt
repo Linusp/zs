@@ -11,6 +11,7 @@ click==7.0
 entrypoints==0.3          # via flake8
 flake8==3.7.9
 mccabe==0.6.1             # via flake8
+peewee==3.13.2
 pyaes==1.6.1              # via telethon
 pyasn1==0.4.8             # via rsa
 pycodestyle==2.5.0        # via flake8

@@ -4,3 +4,4 @@ click
 pysocks
 telethon
 python-dateutil
+peewee

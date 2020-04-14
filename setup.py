@@ -10,6 +10,7 @@ REQS = [
     'pysocks',
     'telethon',
     'python-dateutil',
+    'peewee',
 ]
 
 
