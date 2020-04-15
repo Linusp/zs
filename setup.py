@@ -25,7 +25,10 @@ setup(
     include_package_data=True,
     zip_safe=False,
     entry_points={
-        'console_scripts': ['zs-tg=zs.cli:telegram'],
+        'console_scripts': [
+            'zs-tg=zs.cli:telegram',
+            'zs-rss=zs.cli:rss',
+        ],
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
