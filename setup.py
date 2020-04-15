@@ -11,6 +11,7 @@ REQS = [
     'telethon',
     'python-dateutil',
     'peewee',
+    'requests',
 ]
 
 
