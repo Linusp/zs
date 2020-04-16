@@ -83,13 +83,18 @@ def create_db():
 
 @rss.command()
 @click.option("-n", "--name")
-def list_wx_articles(name):
+@click.option("-s", "--status",
+              type=click.Choice(['sent', 'unsent', 'all']), default='all')
+def list_wx_articles(name, status):
     """列出当前获取到的微信公众号文章"""
-    from .rss.models import DATABASE, WechatArticle
+    from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
 
     DATABASE.connect()
     for article in WechatArticle.search_by_name(name):
-        print(f'[{article.date}] {article.name} -- {article.title}')
+        if status == 'all' or \
+           (status == 'sent' and WechatArticleSentHistory.is_sent(article.url)) or \
+           (status == 'unsent' and not WechatArticleSentHistory.is_sent(article.url)):
+            print(f'[{article.date}] {article.name} -- {article.title}')
 
     DATABASE.close()
 
