@@ -1,0 +1,126 @@
+{
+    "schema_version": 1,
+    "name": "微信公众号 - 晚点LatePost",
+    "description": "微信公众号“晚点LatePost” RSS 输出",
+    "source_url": false,
+    "guid": "73ca39cc-ff2f-4ede-8b79-734946608ba9",
+    "tag_fg_color": "#ffffff",
+    "tag_bg_color": "#5bc0de",
+    "icon": "gear",
+    "exported_at": "2020-04-17T13:05:31Z",
+    "agents": [
+        {
+            "type": "Agents::DataOutputAgent",
+            "name": "#5 快知 - RSS输出",
+            "disabled": false,
+            "guid": "09301eb7-e694-4623-a85a-b44877f58c93",
+            "options": {
+                "secrets": [
+                    "wx-postlate"
+                ],
+                "expected_receive_period_in_days": 2,
+                "template": {
+                    "title": "晚点LatePost",
+                    "description": "公众号“晚点LatePost”更新 - 使用 Huginn 制作",
+                    "item": {
+                        "title": "{{title | strip}}",
+                        "description": "{{fulltext | regex_replace:'data-src','src' | regex_replace:'http://mmbiz.qpic.cn', 'https://mmbiz.qpic.cn'}}",
+                        "link": "{{url}}",
+                        "pubDate": "{{pubDate}}"
+                    }
+                },
+                "ns_media": "true"
+            },
+            "propagate_immediately": true
+        },
+        {
+            "type": "Agents::TriggerAgent",
+            "name": "#3 快知 - 去除图片分享",
+            "disabled": false,
+            "guid": "1dd9e393-088e-4325-b6cb-c6871e1b7af6",
+            "options": {
+                "expected_receive_period_in_days": "2",
+                "keep_event": "true",
+                "rules": [
+                    {
+                        "type": "!regex",
+                        "value": "分享图片",
+                        "path": "title"
+                    }
+                ]
+            },
+            "keep_events_for": 86400,
+            "propagate_immediately": true
+        },
+        {
+            "type": "Agents::RssAgent",
+            "name": "#1 快知 - 文章列表获取",
+            "disabled": false,
+            "guid": "3f22a7d2-f324-45f4-806f-b6d752a31b9c",
+            "options": {
+                "expected_update_period_in_days": "5",
+                "clean": "false",
+                "url": [
+                    "https://rsshub.app/kzfeed/topic/k69QJvO82RKoA"
+                ]
+            },
+            "schedule": "every_1d",
+            "keep_events_for": 86400
+        },
+        {
+            "type": "Agents::DeDuplicationAgent",
+            "name": "#2 快知 - 标题去重",
+            "disabled": false,
+            "guid": "6b369f55c6c93c0e06594aa47eaf9578",
+            "options": {
+                "property": "{{title}}",
+                "lookback": "100",
+                "expected_update_period_in_days": "1"
+            },
+            "keep_events_for": 0,
+            "propagate_immediately": true
+        },
+        {
+            "type": "Agents::WebsiteAgent",
+            "name": "#4 快知 - 文章全文获取",
+            "disabled": false,
+            "guid": "cb4841f8-badb-4b93-a8ff-b60ef16a1b84",
+            "options": {
+                "expected_update_period_in_days": "2",
+                "url_from_event": "{{url}}",
+                "type": "html",
+                "mode": "merge",
+                "extract": {
+                    "fulltext": {
+                        "css": "#js_content",
+                        "value": "."
+                    }
+                }
+            },
+            "schedule": "every_12h",
+            "keep_events_for": 86400,
+            "propagate_immediately": true
+        }
+    ],
+    "links": [
+        {
+            "source": 1,
+            "receiver": 4
+        },
+        {
+            "source": 2,
+            "receiver": 3
+        },
+        {
+            "source": 3,
+            "receiver": 1
+        },
+        {
+            "source": 4,
+            "receiver": 0
+        }
+    ],
+    "control_links": [
+
+    ]
+}

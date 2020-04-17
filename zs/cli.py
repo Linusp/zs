@@ -9,6 +9,7 @@ from telethon import sync       # noqa
 
 from .telegram import TelegramClient
 from .rss.config import RSSConfigManager
+from .rss.huginn import generate_kz_scenario, generate_efb_scenario
 
 
 dictConfig({
@@ -208,3 +209,27 @@ def add_wx_articles(infile):
                 print(f"[{datetime.datetime.now()}] Got {new_articles_cnt} new sent records")
 
     DATABASE.close()
+
+
+@rss.command()
+@click.option("-n", "--name", required=True)
+@click.option("-i", "--wxid", required=True)
+@click.option("-t", "--scenario-type",
+              type=click.Choice(['kz', 'efb']),
+              default='efb')
+@click.option("--kz-topic-id")
+@click.option("--rsshub-base-url", default="https://rsshub.app")
+@click.option("-o", "--outfile", required=True)
+def gen_scenario(name, wxid, scenario_type, kz_topic_id, rsshub_base_url, outfile):
+    """生成用于输出微信公众号 RSS 的 Huginn Scenario"""
+    with open(outfile, 'w') as fout:
+        scenario = {}
+        if scenario_type == 'kz':
+            if not kz_topic_id:
+                click.secho('Missing option "--kz-topic-id"', fg="red", bold=True)
+                return -1
+            scenario = generate_kz_scenario(name, wxid, kz_topic_id, rsshub_base_url)
+        elif scenario_type == 'efb':
+            scenario = generate_efb_scenario(name, wxid)
+
+        json.dump(scenario, fout, ensure_ascii=False, indent=4)
