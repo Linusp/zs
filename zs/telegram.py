@@ -385,7 +385,8 @@ class TelegramClient():
 
         return None
 
-    def fetch_messages(self, name, start=None, batch=100, limit=None, msg_type=None):
+    def fetch_messages(self, name, start=None, batch=100, limit=None, msg_type=None,
+                       verbose=False):
         """获取某个频道或群组的聊天记录
 
         Parameters
@@ -431,7 +432,7 @@ class TelegramClient():
 
             msg_timestamp = None
             for message in message_packages:
-                if cnt > 0:
+                if cnt > 0 and verbose:
                     LOGGER.info("processed %d messages and got %d valid messages",
                                 cnt, len(results))
 
