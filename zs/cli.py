@@ -52,7 +52,8 @@ def telegram():
 @click.option("-l", "--limit", type=int, default=100)
 @click.option("-o", "--outfile", required=True)
 @click.option("-t", "--message-type")
-def fetch_msgs(name, date, limit, outfile, message_type):
+@click.option("-v", "--verbose", is_flag=True)
+def fetch_msgs(name, date, limit, outfile, message_type, verbose):
     """获取某个聊天的消息记录"""
     client = TelegramClient()
 
@@ -60,7 +61,8 @@ def fetch_msgs(name, date, limit, outfile, message_type):
     start = start.replace(tzinfo=tz.tzlocal()).astimezone(datetime.timezone.utc)
     messages = [
         msg.to_dict() for msg in
-        client.fetch_messages(name, start=start, limit=limit, msg_type=message_type)
+        client.fetch_messages(name, start=start, limit=limit,
+                              msg_type=message_type, verbose=verbose)
     ]
     with open(outfile, 'w') as fout:
         json.dump(messages, fout, ensure_ascii=False, indent=4)
@@ -103,7 +105,8 @@ def list_wx_articles(name, status):
 @click.option("-n", "--name", required=True, help="聊天名称，可为群组、频道、用户名")
 @click.option("-d", "--date", default=str(datetime.date.today()))
 @click.option("-l", "--limit", type=int, default=100)
-def fetch_wx_articles(name, date, limit):
+@click.option("-v", "--verbose", is_flag=True)
+def fetch_wx_articles(name, date, limit, verbose):
     """获取微信公众号文章并写入数据库中"""
     from .rss.models import DATABASE, WechatArticle
 
@@ -114,7 +117,9 @@ def fetch_wx_articles(name, date, limit):
 
     DATABASE.connect()
     created_cnt, processed_cnt = 0, 0
-    for msg in client.fetch_messages(name, start=start, limit=limit, msg_type='wx_article'):
+    msgs = client.fetch_messages(name, start=start, limit=limit,
+                                 msg_type='wx_article', verbose=verbose)
+    for msg in msgs:
         title = msg.content['title']
         url = msg.content['url']
         description = msg.content['desc']
@@ -126,6 +131,8 @@ def fetch_wx_articles(name, date, limit):
 
         processed_cnt += 1
         created_cnt += int(created)
+        if created:
+            print(f"Got new article: {name} -- {title}")
 
     DATABASE.close()
     print(f"Got {created_cnt} new articles")
