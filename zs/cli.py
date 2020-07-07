@@ -47,7 +47,7 @@ def telegram():
     pass
 
 
-@telegram.command()
+@telegram.command("fetch-msgs")
 @click.option("-n", "--name", required=True, help="聊天名称，可为群组、频道、用户名")
 @click.option("-d", "--date", default=str(datetime.date.today()))
 @click.option("-l", "--limit", type=int, default=100)
@@ -74,7 +74,7 @@ def rss():
     pass
 
 
-@rss.command()
+@rss.command("create-db")
 def create_db():
     """创建 RSS 相关的数据库"""
     from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
@@ -84,7 +84,7 @@ def create_db():
     DATABASE.close()
 
 
-@rss.command()
+@rss.command("list-wx-articles")
 @click.option("-n", "--name")
 @click.option("-s", "--status",
               type=click.Choice(['sent', 'unsent', 'all']), default='all')
@@ -102,7 +102,7 @@ def list_wx_articles(name, status):
     DATABASE.close()
 
 
-@rss.command()
+@rss.command("fetch-wx-articles")
 @click.option("-n", "--name", required=True, help="聊天名称，可为群组、频道、用户名")
 @click.option("-d", "--date", default=str(datetime.date.today()))
 @click.option("-l", "--limit", type=int, default=100)
@@ -139,7 +139,7 @@ def fetch_wx_articles(name, date, limit, verbose):
     print(f"Got {created_cnt} new articles")
 
 
-@rss.command()
+@rss.command("send-wx-articles")
 @click.option("-n", "--name", help="要发送文章所属的微信公众号名称")
 @click.option("-l", "--limit", type=int)
 @click.option("--send-all", is_flag=True)
@@ -179,7 +179,7 @@ def send_wx_articles(name, limit, send_all):
     DATABASE.close()
 
 
-@rss.command()
+@rss.command("add-wx-articles")
 @click.option("-i", "--infile", required=True)
 def add_wx_articles(infile):
     """从 json 文件中添加微信公众号文章和发送记录"""
@@ -211,7 +211,7 @@ def add_wx_articles(infile):
     DATABASE.close()
 
 
-@rss.command()
+@rss.command("gen-scenario")
 @click.option("-n", "--name", required=True)
 @click.option("-i", "--wxid", required=True)
 @click.option("-t", "--scenario-type",
