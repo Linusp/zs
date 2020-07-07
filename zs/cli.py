@@ -164,16 +164,22 @@ def send_wx_articles(name, limit, send_all):
 
         webhook_url = webhooks.get(article.name) or webhooks['default']
         if config.proxy:
-            requests.post(webhook_url, json=article.to_dict(), proxies=config.proxy)
+            response = requests.post(webhook_url, json=article.to_dict(), proxies=config.proxy)
         else:
-            requests.post(webhook_url, json=article.to_dict())
+            response = requests.post(webhook_url, json=article.to_dict())
 
-        click.secho(
-            f"sent article successfully - name: {article.name}; title: {article.title}",
-            fg="green",
-        )
-        WechatArticleSentHistory.create(url=article.url)
-        sent_cnt += 1
+        if response.status_code == 200:
+            click.secho(
+                f"sent article successfully - name: {article.name}; title: {article.title}",
+                fg="green",
+            )
+            WechatArticleSentHistory.create(url=article.url)
+            sent_cnt += 1
+        else:
+            click.secho(
+                f"failed to send article: {article.name}; title: {article.title}",
+                fg="red",
+            )
 
     click.secho(f"sent {sent_cnt} articles", fg='green')
     DATABASE.close()
