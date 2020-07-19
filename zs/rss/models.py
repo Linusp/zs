@@ -33,13 +33,14 @@ class WechatArticle(BaseModel):
 
     @classmethod
     def search_by_name(cls, name=None, limit=None):
+        search = cls.select()
         if name:
-            search = cls.select().where(cls.name == name)
-        else:
-            search = cls.select().order_by(cls.date)
+            search = search.where(cls.name == name)
 
         if limit:
             search = search.order_by(cls.date.desc()).limit(limit)
+            items = sorted(list(search), key=lambda item: item.date)
+            return items
 
         search = search.order_by(cls.date)
         return search
