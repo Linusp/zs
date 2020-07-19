@@ -163,13 +163,16 @@ def send_wx_articles(name, limit, send_all):
         if not send_all and WechatArticleSentHistory.is_sent(article.url):
             continue
 
-        webhook_url = webhooks.get(article.name) or webhooks['default']
+        webhook_url = webhooks.get(article.name) or webhooks.get('default')
+        if not webhook_url:
+            continue
+
         if config.proxy:
             response = requests.post(webhook_url, json=article.to_dict(), proxies=config.proxy)
         else:
             response = requests.post(webhook_url, json=article.to_dict())
 
-        if response.status_code == 200:
+        if response.status_code in (200, 201):
             click.secho(
                 f"[{datetime.datetime.now()}] sent article successfully - name: {article.name}; title: {article.title}",
                 fg="green",
