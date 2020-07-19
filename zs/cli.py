@@ -136,7 +136,7 @@ def fetch_wx_articles(name, date, limit, verbose):
             print(f"Got new article: {name} -- {title}")
 
     DATABASE.close()
-    print(f"Got {created_cnt} new articles")
+    print(f"[{datetime.datetime.now()}] Got {created_cnt} new articles")
 
 
 @rss.command("send-wx-articles")
@@ -170,18 +170,18 @@ def send_wx_articles(name, limit, send_all):
 
         if response.status_code == 200:
             click.secho(
-                f"sent article successfully - name: {article.name}; title: {article.title}",
+                f"[{datetime.datetime.now()}] sent article successfully - name: {article.name}; title: {article.title}",
                 fg="green",
             )
             WechatArticleSentHistory.create(url=article.url)
             sent_cnt += 1
         else:
             click.secho(
-                f"failed to send article: {article.name}; title: {article.title}",
+                f"[{datetime.datetime.now()}] failed to send article: {article.name}; title: {article.title}",
                 fg="red",
             )
 
-    click.secho(f"sent {sent_cnt} articles", fg='green')
+    click.secho(f"[{datetime.datetime.now()}] sent {sent_cnt} articles", fg='green')
     DATABASE.close()
 
 
