@@ -147,14 +147,16 @@ def send_wx_articles(name, limit, send_all):
 
         if response.status_code in (200, 201):
             click.secho(
-                f"[{datetime.datetime.now()}] sent article successfully - name: {article.name}; title: {article.title}",
+                f"[{datetime.datetime.now()}] sent article successfully - "
+                f"name: {article.name}; title: {article.title}",
                 fg="green",
             )
             WechatArticleSentHistory.create(url=article.url)
             sent_cnt += 1
         else:
             click.secho(
-                f"[{datetime.datetime.now()}] failed to send article: {article.name}; title: {article.title}",
+                f"[{datetime.datetime.now()}] failed to send article:"
+                f" {article.name}; title: {article.title}",
                 fg="red",
             )
 
