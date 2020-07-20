@@ -7,9 +7,9 @@ import requests
 from dateutil import tz, parser
 from telethon import sync       # noqa
 
-from .telegram import TelegramClient
-from .rss.config import RSSConfigManager
-from .rss.huginn import generate_kz_scenario, generate_efb_scenario
+from zs.telegram import TelegramClient
+from zs.rss.config import RSSConfigManager
+from zs.rss.huginn import generate_kz_scenario, generate_efb_scenario
 
 
 dictConfig({
@@ -43,38 +43,11 @@ dictConfig({
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
-def telegram():
+def main():
     pass
 
 
-@telegram.command("fetch-msgs")
-@click.option("-n", "--name", required=True, help="聊天名称，可为群组、频道、用户名")
-@click.option("-d", "--date", default=str(datetime.date.today()))
-@click.option("-l", "--limit", type=int, default=100)
-@click.option("-o", "--outfile", required=True)
-@click.option("-t", "--message-type")
-@click.option("-v", "--verbose", is_flag=True)
-def fetch_msgs(name, date, limit, outfile, message_type, verbose):
-    """获取某个聊天的消息记录"""
-    client = TelegramClient()
-
-    start = datetime.datetime.strptime(date, '%Y-%m-%d')
-    start = start.replace(tzinfo=tz.tzlocal()).astimezone(datetime.timezone.utc)
-    messages = [
-        msg.to_dict() for msg in
-        client.fetch_messages(name, start=start, limit=limit,
-                              msg_type=message_type, verbose=verbose)
-    ]
-    with open(outfile, 'w') as fout:
-        json.dump(messages, fout, ensure_ascii=False, indent=4)
-
-
-@click.group(context_settings=dict(help_option_names=['-h', '--help']))
-def rss():
-    pass
-
-
-@rss.command("create-db")
+@main.command("create-db")
 def create_db():
     """创建 RSS 相关的数据库"""
     from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
@@ -84,7 +57,7 @@ def create_db():
     DATABASE.close()
 
 
-@rss.command("list-wx-articles")
+@main.command("list-wx-articles")
 @click.option("-n", "--name")
 @click.option("-s", "--status",
               type=click.Choice(['sent', 'unsent', 'all']), default='all')
@@ -103,7 +76,7 @@ def list_wx_articles(name, status, limit):
     DATABASE.close()
 
 
-@rss.command("fetch-wx-articles")
+@main.command("fetch-wx-articles")
 @click.option("-n", "--name", required=True, help="聊天名称，可为群组、频道、用户名")
 @click.option("-d", "--date", default=str(datetime.date.today()))
 @click.option("-l", "--limit", type=int, default=100)
@@ -140,7 +113,7 @@ def fetch_wx_articles(name, date, limit, verbose):
     print(f"[{datetime.datetime.now()}] Got {created_cnt} new articles")
 
 
-@rss.command("send-wx-articles")
+@main.command("send-wx-articles")
 @click.option("-n", "--name", help="要发送文章所属的微信公众号名称")
 @click.option("-l", "--limit", type=int)
 @click.option("--send-all", is_flag=True)
@@ -189,7 +162,7 @@ def send_wx_articles(name, limit, send_all):
     DATABASE.close()
 
 
-@rss.command("add-wx-articles")
+@main.command("add-wx-articles")
 @click.option("-i", "--infile", required=True)
 def add_wx_articles(infile):
     """从 json 文件中添加微信公众号文章和发送记录"""
@@ -221,7 +194,7 @@ def add_wx_articles(infile):
     DATABASE.close()
 
 
-@rss.command("gen-scenario")
+@main.command("gen-scenario")
 @click.option("-n", "--name", required=True)
 @click.option("-i", "--wxid", required=True)
 @click.option("-t", "--scenario-type",

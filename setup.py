@@ -26,8 +26,8 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'zs-tg=zs.cli:telegram',
-            'zs-rss=zs.cli:rss',
+            'zs-tg=zs.cli.telegram:main',
+            'zs-rss=zs.cli.rss:main',
         ],
     },
     classifiers=[
