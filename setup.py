@@ -26,6 +26,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
+            'zs=zs.cli.main:main',
             'zs-tg=zs.cli.telegram:main',
             'zs-rss=zs.cli.rss:main',
         ],
