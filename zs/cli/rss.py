@@ -11,7 +11,6 @@ from zs.telegram import TelegramClient
 from zs.rss.config import RSSConfigManager
 from zs.rss.huginn import generate_kz_scenario, generate_efb_scenario
 
-
 dictConfig({
     'version': 1,
     'formatters': {
@@ -50,7 +49,7 @@ def main():
 @main.command("create-db")
 def create_db():
     """创建 RSS 相关的数据库"""
-    from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
+    from zs.rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
 
     DATABASE.connect()
     DATABASE.create_tables([WechatArticle, WechatArticleSentHistory])
@@ -64,7 +63,7 @@ def create_db():
 @click.option("-l", "--limit", type=int)
 def list_wx_articles(name, status, limit):
     """列出当前获取到的微信公众号文章"""
-    from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
+    from zs.rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
 
     DATABASE.connect()
     for article in WechatArticle.search_by_name(name, limit=limit):
@@ -83,7 +82,7 @@ def list_wx_articles(name, status, limit):
 @click.option("-v", "--verbose", is_flag=True)
 def fetch_wx_articles(name, date, limit, verbose):
     """获取微信公众号文章并写入数据库中"""
-    from .rss.models import DATABASE, WechatArticle
+    from zs.rss.models import DATABASE, WechatArticle
 
     client = TelegramClient()
 
@@ -119,7 +118,7 @@ def fetch_wx_articles(name, date, limit, verbose):
 @click.option("--send-all", is_flag=True)
 def send_wx_articles(name, limit, send_all):
     """将微信公众号发送到 Huginn"""
-    from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
+    from zs.rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
 
     config = RSSConfigManager()
     webhooks = config.huginn_webhooks
@@ -168,8 +167,6 @@ def send_wx_articles(name, limit, send_all):
 @click.option("-i", "--infile", required=True)
 def add_wx_articles(infile):
     """从 json 文件中添加微信公众号文章和发送记录"""
-    from .rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
-
     DATABASE.connect()
     new_articles_cnt, new_sent = 0, 0
     with open(infile) as f:
