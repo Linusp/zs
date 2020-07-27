@@ -164,13 +164,19 @@ def send_wx_articles(name, limit, send_all):
 
 
 @main.command("add-wx-articles")
+@click.option("-n", "--name")
 @click.option("-i", "--infile", required=True)
-def add_wx_articles(infile):
+def add_wx_articles(name, infile):
     """从 json 文件中添加微信公众号文章和发送记录"""
+    from zs.rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
+
     DATABASE.connect()
     new_articles_cnt, new_sent = 0, 0
     with open(infile) as f:
         for idx, (_, item) in enumerate(json.load(f).items()):
+            if name and item['name'] != name:
+                continue
+
             _, created = WechatArticle.get_or_create(
                 name=item['name'],
                 title=item['title'],
