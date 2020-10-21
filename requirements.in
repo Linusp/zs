@@ -6,3 +6,4 @@ telethon
 python-dateutil
 peewee
 requests
+feedparser

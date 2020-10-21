@@ -91,3 +91,9 @@ pip install git+https://github.com/Linusp/zs.git
   ```shell
   zs-rss gen-scenario -t efb -n 晚点LatePost -i postlate -o postlate.json
   ```
+
+- gen-daily-scenario
+
+  ```shell
+  zs-rss gen-daily-scenario --feed-url "https://www.gcores.com/rss" -n 机核 -o gcore.json
+  ```

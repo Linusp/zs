@@ -10,3 +10,6 @@ KZ_SCENARIO_TEMPLATE = json.load(
 EFB_SCENARIO_TEMPLATE = json.load(
     open(os.path.join(WORK_DIR, 'efb_scenario_template.json'))
 )
+DAILY_DIGEST_SCENARIO_TEMPLATE = json.load(
+    open(os.path.join(WORK_DIR, 'daily_digest_rss.json'))
+)

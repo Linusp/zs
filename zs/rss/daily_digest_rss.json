@@ -1,0 +1,111 @@
+{
+    "schema_version": 1,
+    "name": "",
+    "description": "No description provided",
+    "source_url": false,
+    "guid": "2f780abfc7d74e338c58f3ade24fe296",
+    "tag_fg_color": "#ffffff",
+    "tag_bg_color": "#5bc0de",
+    "icon": "gear",
+    "exported_at": "2020-10-21T14:23:23Z",
+    "agents": [
+        {
+            "type": "Agents::EventFormattingAgent",
+            "name": "添加标题",
+            "disabled": false,
+            "guid": "8fedc87e7d5bfb2289027d8440fa87ce",
+            "options": {
+                "instructions": {
+                    "content": "{{ message }}",
+                    "title": "{% assign current_date = 'now' | date: '%s' | minus: 86400 %} {{current_date | date: \"%Y-%m-%d\" }} 摘要"
+                },
+                "matchers": [],
+                "mode": "clean"
+            },
+            "keep_events_for": 259200,
+            "propagate_immediately": true
+        },
+        {
+            "type": "Agents::DigestAgent",
+            "name": "每日消息聚合",
+            "disabled": false,
+            "guid": "9c0812d348a1d7cdbb9c314a58a7e844",
+            "options": {
+                "message": "<ul>{% for event in events %}<li><a href={{ event.url }}>{{ event.title }}</a></li>{% endfor %}</ul>",
+                "expected_receive_period_in_days": "2",
+                "retained_events": "0"
+            },
+            "schedule": "1am",
+            "keep_events_for": 259200,
+            "propagate_immediately": false
+        },
+        {
+            "type": "Agents::RssAgent",
+            "name": "输入RSS",
+            "disabled": false,
+            "guid": "a940c72201719f0edcd0d8ad0ffcf65e",
+            "options": {
+                "expected_update_period_in_days": "5",
+                "clean": "false",
+                "url": ""
+            },
+            "schedule": "every_1m",
+            "keep_events_for": 172800
+        },
+        {
+            "type": "Agents::DelayAgent",
+            "name": "聚合结果延迟发送",
+            "disabled": false,
+            "guid": "aa01ed96adc9becb9a29ee9885ca28b1",
+            "options": {
+                "expected_receive_period_in_days": "3",
+                "max_events": "100",
+                "keep": "newest",
+                "max_emitted_events": "1"
+            },
+            "schedule": "6am",
+            "keep_events_for": 259200,
+            "propagate_immediately": true
+        },
+        {
+            "type": "Agents::DataOutputAgent",
+            "name": "输出RSS",
+            "disabled": false,
+            "guid": "c325dd005c4f5b04cd371e730fc5ba09",
+            "options": {
+                "secrets": [],
+                "expected_receive_period_in_days": 2,
+                "template": {
+                    "title": "",
+                    "description": "",
+                    "item": {
+                        "title": "{{ title }}",
+                        "description": "{{ content }}",
+                        "link": ""
+                    }
+                },
+                "ns_media": "true"
+            },
+            "propagate_immediately": true
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "receiver": 3
+        },
+        {
+            "source": 1,
+            "receiver": 0
+        },
+        {
+            "source": 2,
+            "receiver": 1
+        },
+        {
+            "source": 3,
+            "receiver": 4
+        }
+    ],
+    "control_links": []
+}

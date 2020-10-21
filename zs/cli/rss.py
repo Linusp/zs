@@ -9,7 +9,11 @@ from telethon import sync       # noqa
 
 from zs.telegram import TelegramClient
 from zs.rss.config import RSSConfigManager
-from zs.rss.huginn import generate_kz_scenario, generate_efb_scenario
+from zs.rss.huginn import (
+    generate_kz_scenario,
+    generate_efb_scenario,
+    generate_daily_digest_scenario,
+)
 
 dictConfig({
     'version': 1,
@@ -220,4 +224,16 @@ def gen_scenario(name, wxid, scenario_type, kz_topic_id, rsshub_base_url, outfil
         elif scenario_type == 'efb':
             scenario = generate_efb_scenario(name, wxid)
 
+        json.dump(scenario, fout, ensure_ascii=False, indent=4)
+
+
+@main.command("gen-daily-scenario")
+@click.option("--feed-url", required=True)
+@click.option("-n", "--name")
+@click.option("-d", "--description")
+@click.option("-o", "--outfile", required=True)
+def gen_daily_scenario(feed_url, name, description, outfile):
+    """为一个指定的 RSS 生成每日摘要 RSS"""
+    with open(outfile, 'w') as fout:
+        scenario = generate_daily_digest_scenario(feed_url, name, description)
         json.dump(scenario, fout, ensure_ascii=False, indent=4)
