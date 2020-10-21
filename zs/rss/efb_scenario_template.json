@@ -11,7 +11,7 @@
     "agents": [
         {
             "type": "Agents::TriggerAgent",
-            "name": "微信公众号-图文消息筛选",
+            "name": "{}-图文消息筛选",
             "disabled": false,
             "guid": "0152b899977b4ffe9098882097cd5590",
             "options": {
@@ -30,7 +30,7 @@
         },
         {
             "type": "Agents::DataOutputAgent",
-            "name": "微信公众号-RSS输出",
+            "name": "{}-RSS输出",
             "disabled": false,
             "guid": "0c37657bed2d4ebfadecc702fdffc2ee",
             "options": {
@@ -54,7 +54,7 @@
         },
         {
             "type": "Agents::WebhookAgent",
-            "name": "微信公众号 Webhooks",
+            "name": "{} Webhooks",
             "disabled": false,
             "guid": "69adc1e8db2f30d40a31ab5cb9a91720",
             "options": {
@@ -66,7 +66,7 @@
         },
         {
             "type": "Agents::DataOutputAgent",
-            "name": "微信公众号 - 摘要 RSS 输出",
+            "name": "{}-摘要RSS输出",
             "disabled": false,
             "guid": "71ede70a9957ac29e33cd46c39adb36c",
             "options": {
@@ -90,7 +90,7 @@
         },
         {
             "type": "Agents::DeDuplicationAgent",
-            "name": "微信公众号-标题去重",
+            "name": "{}-标题去重",
             "disabled": false,
             "guid": "8c94333dc71541abb08deab14311d2a4",
             "options": {
@@ -103,7 +103,7 @@
         },
         {
             "type": "Agents::WebsiteAgent",
-            "name": "微信公众号-图文消息全文获取",
+            "name": "{}-图文消息全文获取",
             "disabled": false,
             "guid": "d4b721c9a5ca48e3bdd8bf4ff81b2086",
             "options": {

@@ -32,6 +32,7 @@ def generate_efb_scenario(name, wxid):
     result['guid'] = str(uuid4()).replace('-', '')
     for agent in result['agents']:
         agent['guid'] = str(uuid4()).replace('-', '')
+        agent['name'] = agent['name'].format(name)
         if agent['type'] == 'Agents::DataOutputAgent':
             agent['options']['secrets'] = [f'wx-{wxid}']
             agent['options']['template']['title'] = name
