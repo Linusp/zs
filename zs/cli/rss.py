@@ -203,7 +203,7 @@ def add_wx_articles(name, infile):
     DATABASE.close()
 
 
-@main.command("gen-scenario")
+@main.command("gen-wx-scenario")
 @click.option("-n", "--name", required=True)
 @click.option("-i", "--wxid", required=True)
 @click.option("-t", "--scenario-type",
@@ -212,7 +212,7 @@ def add_wx_articles(name, infile):
 @click.option("--kz-topic-id")
 @click.option("--rsshub-base-url", default="https://rsshub.app")
 @click.option("-o", "--outfile", required=True)
-def gen_scenario(name, wxid, scenario_type, kz_topic_id, rsshub_base_url, outfile):
+def gen_wx_scenario(name, wxid, scenario_type, kz_topic_id, rsshub_base_url, outfile):
     """生成用于输出微信公众号 RSS 的 Huginn Scenario"""
     with open(outfile, 'w') as fout:
         scenario = {}

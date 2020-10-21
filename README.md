@@ -81,15 +81,15 @@ pip install git+https://github.com/Linusp/zs.git
   zs-rss send-wx-articles -n 晚点LatePost -l 100
   ```
 
-- gen-scenario
+- gen-wx-scenario
 
   ```shell
-  zs-rss gen-scenario -t kz -n 晚点LatePost -i postlate --kz-topic-id k69QJvO82RKoA -o postlate.json
+  zs-rss gen-wx-scenario -t kz -n 晚点LatePost -i postlate --kz-topic-id k69QJvO82RKoA -o postlate.json
   ```
 
   or
   ```shell
-  zs-rss gen-scenario -t efb -n 晚点LatePost -i postlate -o postlate.json
+  zs-rss gen-wx-scenario -t efb -n 晚点LatePost -i postlate -o postlate.json
   ```
 
 - gen-daily-scenario
