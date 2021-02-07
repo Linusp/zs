@@ -381,6 +381,8 @@ def send_articles(name, limit, dest_type, send_all):
             continue
 
         response = sender.send(article)
+        if not response:
+            continue
         if response.status_code in (200, 201):
             click.secho(
                 f"[{datetime.datetime.now()}] sent article successfully - "
