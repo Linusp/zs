@@ -164,6 +164,8 @@ def send_wx_articles(name, limit, send_all):
         else:
             response = requests.post(webhook_url, json=article.to_dict())
 
+        if not response:
+            continue
         if response.status_code in (200, 201):
             click.secho(
                 f"[{datetime.datetime.now()}] sent article successfully - "
