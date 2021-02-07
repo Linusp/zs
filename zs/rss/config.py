@@ -31,3 +31,7 @@ class RSSConfigManager():
     @property
     def proxy(self):
         return self.data.get('proxy')
+
+    @property
+    def senders(self):
+        return self.data.get('senders', {})
