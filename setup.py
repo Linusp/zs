@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '0.4.3'
+VERSION = '0.4.4'
 REQS = [
     'click',
     'pysocks',
@@ -42,7 +42,10 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
     ],
-    data_files=[('', ['zs/rss/kz_scenario_template.json',
-                      'zs/rss/efb_scenario_template.json'])],
+    data_files=[
+        ('', ['zs/rss/kz_scenario_template.json',
+              'zs/rss/efb_scenario_template.json',
+              'zs/rss/daily_digest_rss.json']
+         )],
 
 )
