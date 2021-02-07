@@ -324,6 +324,7 @@ def fetch_rss_articles(name):
         )
         if created:
             article.publish_date = publish_date
+            article.save()
             created_cnt += 1
 
     click.secho(f"fetched {created_cnt} new articles")
