@@ -1,11 +1,14 @@
 import json
 import datetime
 from logging.config import dictConfig
+from time import mktime
 
 import click
 import requests
 from dateutil import tz, parser
 from telethon import sync       # noqa
+import feedparser
+from tabulate import tabulate
 
 from zs.telegram import TelegramClient
 from zs.rss.config import RSSConfigManager
@@ -237,3 +240,144 @@ def gen_daily_scenario(feed_url, name, description, outfile):
     with open(outfile, 'w') as fout:
         scenario = generate_daily_digest_scenario(feed_url, name, description)
         json.dump(scenario, fout, ensure_ascii=False, indent=4)
+
+
+@main.command("add-feed")
+@click.option("-n", "--name", required=True)
+@click.option("-f", "--feed-url", required=True)
+def add_feed(name, feed_url):
+    """添加 RSS Feed 到数据库"""
+    from zs.rss.models import Feed
+
+    if Feed.get_or_none(Feed.feed_link == feed_url):
+        click.secho("this feed is already in databse", fg='red')
+    else:
+        feed_data = feedparser.parse(feed_url)
+        feed_info = feed_data['feed']
+        Feed.get_or_create(
+            name=name,
+            title=feed_info['title'],
+            subtitle=feed_info.get('subtitle', ''),
+            link=feed_info['link'],
+            feed_link=feed_url,
+            version=feed_data['version'],
+        )
+        click.secho("added this feed to database", fg='green')
+
+
+@main.command("list-feeds")
+def list_feeds():
+    """列出当前的 RSS Feed"""
+    from zs.rss.models import Feed
+
+    data = []
+    for feed in Feed.select():
+        data.append([feed.name, feed.feed_link])
+
+    print(
+        tabulate(data,
+                 headers=['name', 'url'],
+                 showindex='always',
+                 tablefmt='pretty')
+    )
+
+
+@main.command("fetch-rss")
+@click.option("-n", "--name", required=True, help="feed 名字")
+def fetch_rss_articles(name):
+    """获取 RSS 并写入数据库中"""
+    from zs.rss.models import Feed, Article
+
+    feed = Feed.get_or_none(Feed.name == name)
+    if not feed:
+        click.secho(f"Feed is not found: {name}", fg='red')
+        return -1
+
+    feed_url = feed.feed_link
+    feed_data = feedparser.parse(feed_url)
+    created_cnt = 0
+    for entry in feed_data['entries']:
+        publish_date = None
+        if entry.get('published_parsed'):
+            publish_date = datetime.datetime.fromtimestamp(mktime(entry.get('published_parsed')))
+        else:
+            publish_date = datetime.datetime.now()
+
+        article, created = Article.get_or_create(
+            title=entry['title'],
+            summary=entry.get('summary') or entry.get('content') or '',
+            link=entry['link'],
+            feed=feed,
+        )
+        if created:
+            article.publish_date = publish_date
+            created_cnt += 1
+
+    click.secho(f"fetched {created_cnt} new articles")
+
+
+@main.command("list-articles")
+@click.option("-n", "--name")
+@click.option("-s", "--status",
+              type=click.Choice(['sent', 'unsent', 'all']), default='all')
+@click.option("-d", "--sent-dest")
+@click.option("-l", "--limit", type=int)
+def list_articles(name, status, sent_dest, limit):
+    """列出当前获取到的微信公众号文章"""
+    from zs.rss.models import Article, SentHistory
+
+    for article in Article.search_by_feed(name, limit=limit):
+        if status == 'all' or \
+           (status == 'sent' and SentHistory.is_sent(article.url, dest=sent_dest)) or \
+           (status == 'unsent' and not SentHistory.is_sent(article.url)):
+            title = article.title if len(article.title) <= 30 else article.title[:30] + '...'
+            print(f'[{article.publish_date}] {article.feed.name} -- {title}')
+
+
+@main.command("send-articles")
+@click.option("-n", "--name", help="要发送文章的订阅源的名字", required=True)
+@click.option("-l", "--limit", type=int)
+@click.option("--dest-type", required=True)
+@click.option("--send-all", is_flag=True)
+def send_articles(name, limit, dest_type, send_all):
+    from zs.rss.models import Article, SentHistory
+    from zs.rss.sender import get_sender_cls
+
+    sent_cnt = 0
+
+    sender_cls = get_sender_cls(dest_type)
+    if sender_cls is None:
+        click.secho("cannot support your dest url now", fg='red')
+        return -1
+
+    config = RSSConfigManager()
+    sender_config = config.senders.get(name, {}).get(dest_type, {})
+    if not sender_config:
+        click.secho(
+            f"[{datetime.datetime.now()}] sender config is missing in `{config.config_file}`",
+            fg='red',
+        )
+        return -1
+
+    sender = sender_cls(**sender_config)
+    for article in Article.search_by_feed(name, limit):
+        if not send_all and SentHistory.is_sent(article.link, dest_type):
+            continue
+
+        response = sender.send(article)
+        if response.status_code in (200, 201):
+            click.secho(
+                f"[{datetime.datetime.now()}] sent article successfully - "
+                f"name: {article.feed.name}; title: {article.title}",
+                fg="green",
+            )
+            SentHistory.create(url=article.link, dest=dest_type)
+            sent_cnt += 1
+        else:
+            click.secho(
+                f"[{datetime.datetime.now()}] failed to send article:"
+                f" {article.feed.name}; title: {article.title}",
+                fg="red",
+            )
+
+    click.secho(f"[{datetime.datetime.now()}] sent {sent_cnt} articles", fg='green')
