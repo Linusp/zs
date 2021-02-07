@@ -4,27 +4,50 @@
 #
 #    pip-compile --output-file=requirements.txt requirements.in
 #
---index-url https://mirrors.aliyun.com/pypi/simple
+--index-url https://mirrors.aliyun.com/pypi/simple/
 --trusted-host mirrors.aliyun.com
 
-certifi==2020.4.5.1       # via requests
-chardet==3.0.4            # via requests
+certifi==2020.4.5.1
+    # via requests
+chardet==3.0.4
+    # via requests
 click==7.0
-entrypoints==0.3          # via flake8
+    # via -r requirements.in
+entrypoints==0.3
+    # via flake8
 feedparser==6.0.1
+    # via -r requirements.in
 flake8==3.7.9
-idna==2.9                 # via requests
-mccabe==0.6.1             # via flake8
+    # via -r requirements.in
+idna==2.9
+    # via requests
+mccabe==0.6.1
+    # via flake8
 peewee==3.13.2
-pyaes==1.6.1              # via telethon
-pyasn1==0.4.8             # via rsa
-pycodestyle==2.5.0        # via flake8
-pyflakes==2.1.1           # via flake8
+    # via -r requirements.in
+pyaes==1.6.1
+    # via telethon
+pyasn1==0.4.8
+    # via rsa
+pycodestyle==2.5.0
+    # via flake8
+pyflakes==2.1.1
+    # via flake8
 pysocks==1.7.1
+    # via -r requirements.in
 python-dateutil==2.8.1
+    # via -r requirements.in
 requests==2.23.0
-rsa==4.0                  # via telethon
-sgmllib3k==1.0.0          # via feedparser
-six==1.14.0               # via python-dateutil
+    # via -r requirements.in
+rsa==4.0
+    # via telethon
+sgmllib3k==1.0.0
+    # via feedparser
+six==1.14.0
+    # via python-dateutil
+tabulate==0.8.7
+    # via -r requirements.in
 telethon==1.10.10
-urllib3==1.25.8           # via requests
+    # via -r requirements.in
+urllib3==1.25.8
+    # via requests

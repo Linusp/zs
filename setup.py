@@ -12,6 +12,8 @@ REQS = [
     'python-dateutil',
     'peewee',
     'requests',
+    'feedparser',
+    'tabulate',
 ]
 
 
