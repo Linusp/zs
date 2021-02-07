@@ -56,10 +56,23 @@ def main():
 @main.command("create-db")
 def create_db():
     """创建 RSS 相关的数据库"""
-    from zs.rss.models import DATABASE, WechatArticle, WechatArticleSentHistory
+    from zs.rss.models import (
+        DATABASE,
+        WechatArticle,
+        WechatArticleSentHistory,
+        Feed,
+        Article,
+        SentHistory,
+    )
 
     DATABASE.connect()
-    DATABASE.create_tables([WechatArticle, WechatArticleSentHistory])
+    DATABASE.create_tables([
+        WechatArticle,
+        WechatArticleSentHistory,
+        Feed,
+        Article,
+        SentHistory,
+    ])
     DATABASE.close()
 
 
