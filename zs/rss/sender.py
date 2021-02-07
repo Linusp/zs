@@ -35,10 +35,11 @@ class Sender(ABC):
 
     def send(self, article):
         data = self.prepare_data(article)
-        response = requests.post(self.dest_url,
-                                 json=data,
-                                 headers={"Content-Type": "application/json"})
-        return response
+        if data:
+            response = requests.post(self.dest_url,
+                                     json=data,
+                                     headers={"Content-Type": "application/json"})
+            return response
 
 
 @register_sender('slack_incoming')
@@ -49,6 +50,7 @@ class SlackIncomingSender(Sender):
     def __init__(self, dest_url, **kwargs):
         super().__init__(dest_url, **kwargs)
         self.channel = kwargs.get('channel', 'general')
+        self.filters = kwargs.get('filters', [])
 
     @staticmethod
     def extract_links(html_content):
@@ -92,7 +94,14 @@ class SlackIncomingSender(Sender):
         return text
 
     def prepare_data(self, article):
+        if self.filters and not any(article.summary.find(word) >= 0 for word in self.filters):
+            return None
+
         blocks, links = [], []
+        blocks.append({
+            'type': 'section',
+            'text': {'type': 'mrkdwn', 'text': f'from: *{article.feed.name}*'}
+        })
         if 'title' in self.content:
             links.extend(self.extract_links(article.title))
             blocks.append({
