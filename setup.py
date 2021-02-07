@@ -14,6 +14,7 @@ REQS = [
     'requests',
     'feedparser',
     'tabulate',
+    'lxml',
 ]
 
 

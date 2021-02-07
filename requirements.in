@@ -8,3 +8,4 @@ peewee
 requests
 feedparser
 tabulate
+lxml
