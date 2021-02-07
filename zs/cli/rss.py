@@ -320,12 +320,12 @@ def fetch_rss_articles(name):
 
         article, created = Article.get_or_create(
             title=entry['title'],
-            summary=entry.get('summary') or entry.get('content') or '',
             link=entry['link'],
             feed=feed,
         )
         if created:
             article.publish_date = publish_date
+            article.summary = entry.get('summary') or entry.get('content') or ''
             article.save()
             created_cnt += 1
 
