@@ -318,15 +318,15 @@ def fetch_rss_articles(name):
         else:
             publish_date = datetime.datetime.now()
 
-        article, created = Article.get_or_create(
-            title=entry['title'],
-            link=entry['link'],
-            feed=feed,
-        )
-        if created:
-            article.publish_date = publish_date
-            article.summary = entry.get('summary') or entry.get('content') or ''
-            article.save()
+        query = Article.select().where(Article.link == entry['link'])
+        if not query.exists():
+            Article.create(
+                title=entry['title'],
+                link=entry['link'],
+                summary=entry.get('summary') or entry.get('content') or '',
+                feed=feed,
+                publish_date=publish_date,
+            )
             created_cnt += 1
 
     click.secho(f"fetched {created_cnt} new articles")
