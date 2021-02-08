@@ -344,8 +344,8 @@ def list_articles(name, status, sent_dest, limit):
 
     for article in Article.search_by_feed(name, limit=limit):
         if status == 'all' or \
-           (status == 'sent' and SentHistory.is_sent(article.url, dest=sent_dest)) or \
-           (status == 'unsent' and not SentHistory.is_sent(article.url)):
+           (status == 'sent' and SentHistory.is_sent(article.link, dest=sent_dest)) or \
+           (status == 'unsent' and not SentHistory.is_sent(article.link)):
             title = article.title if len(article.title) <= 30 else article.title[:30] + '...'
             print(f'[{article.publish_date}] {article.feed.name} -- {title}')
 
