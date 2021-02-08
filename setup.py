@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '0.4.8'
+VERSION = '0.4.9'
 REQS = [
     'click',
     'pysocks',
