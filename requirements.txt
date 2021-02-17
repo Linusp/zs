@@ -33,6 +33,8 @@ pyasn1==0.4.8
     # via rsa
 pycodestyle==2.5.0
     # via flake8
+pyexecjs==1.5.1
+    # via -r requirements.in
 pyflakes==2.1.1
     # via flake8
 pysocks==1.7.1
@@ -46,7 +48,9 @@ rsa==4.0
 sgmllib3k==1.0.0
     # via feedparser
 six==1.14.0
-    # via python-dateutil
+    # via
+    #   pyexecjs
+    #   python-dateutil
 tabulate==0.8.7
     # via -r requirements.in
 telethon==1.10.10

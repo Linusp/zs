@@ -4,7 +4,7 @@
 from setuptools import setup, find_packages
 
 
-VERSION = '0.5.0'
+VERSION = '0.6.0'
 REQS = [
     'click',
     'pysocks',
@@ -15,6 +15,7 @@ REQS = [
     'feedparser',
     'tabulate',
     'lxml',
+    'PyExecJS',
 ]
 
 
@@ -32,6 +33,7 @@ setup(
             'zs=zs.cli.main:main',
             'zs-tg=zs.cli.telegram:main',
             'zs-rss=zs.cli.rss:main',
+            'zs-asset=zs.cli.asset:main',
         ],
     },
     classifiers=[
