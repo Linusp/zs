@@ -33,7 +33,6 @@ setup(
             'zs=zs.cli.main:main',
             'zs-tg=zs.cli.telegram:main',
             'zs-rss=zs.cli.rss:main',
-            'zs-asset=zs.cli.asset:main',
         ],
     },
     classifiers=[
