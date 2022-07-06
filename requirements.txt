@@ -18,7 +18,7 @@ flake8==3.7.9
     # via -r requirements.in
 idna==2.9
     # via requests
-lxml==4.6.5
+lxml==4.9.1
     # via -r requirements.in
 mccabe==0.6.1
     # via flake8
