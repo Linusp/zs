@@ -1,8 +1,7 @@
 import os
 
-
-CONFIG_DIR = os.path.join(os.environ.get('HOME'), '.zs', 'config')
-DATA_DIR = os.path.join(os.environ.get('HOME'), '.zs', 'data')
+CONFIG_DIR = os.path.join(os.environ.get("HOME"), ".zs", "config")
+DATA_DIR = os.path.join(os.environ.get("HOME"), ".zs", "data")
 
 
 README_TEMPLATE = """{name}
@@ -77,7 +76,7 @@ lock-requirements:
 deps:
 \t- pip install -U pip setuptools
 \t- pip install -r requirements.txt
-"""                             # noqa
+"""  # noqa
 
 
 SETUP_CFG = """[flake8]

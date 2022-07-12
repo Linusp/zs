@@ -1,36 +1,31 @@
-import os
-import re
 import json
 import logging
+import os
+import re
 from enum import Enum
-from functools import lru_cache
 from urllib.parse import parse_qsl, urlencode, urlparse
 
 import socks
-from telethon import sync       # noqa
-from telethon.sessions import StringSession
 from telethon import TelegramClient as TelethonClient
-from telethon.tl.types import Photo, MessageEntityTextUrl
+from telethon import sync  # noqa
+from telethon.sessions import StringSession
+from telethon.tl.types import MessageEntityTextUrl, Photo
 
 from .consts import CONFIG_DIR, DATA_DIR
 
-
 LOGGER = logging.getLogger(__name__)
-DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, 'telegram.json')
+DEFAULT_CONFIG_FILE = os.path.join(CONFIG_DIR, "telegram.json")
 
-WX_ARTICLE_PREFIX = '💬👤'
-WX_LINK_PREFIX = '🔗'
-WX_CHANNEL_PREFIX_PATTERN = re.compile(
-    r'(?:^微信)|'
-    r'(?:^tele_wechat_bot$)'
-)
-WX_IMAGE_AUTHOR_PAT = re.compile(r'^(?P<name>.+):\nsent a (?:picture|sticker)\.$')
-WX_GENERAL_AUTHOR_PAT = re.compile(r'^(?P<name>.+):[\n ]+')
+WX_ARTICLE_PREFIX = "💬👤"
+WX_LINK_PREFIX = "🔗"
+WX_CHANNEL_PREFIX_PATTERN = re.compile(r"(?:^微信)|" r"(?:^tele_wechat_bot$)")
+WX_IMAGE_AUTHOR_PAT = re.compile(r"^(?P<name>.+):\nsent a (?:picture|sticker)\.$")
+WX_GENERAL_AUTHOR_PAT = re.compile(r"^(?P<name>.+):[\n ]+")
 
 
-class TelegramConfigManager():
+class TelegramConfigManager:
 
-    DEFAULT_DOWNLOAD_PATH = os.path.join(DATA_DIR, 'telegram')
+    DEFAULT_DOWNLOAD_PATH = os.path.join(DATA_DIR, "telegram")
 
     def __init__(self, config_file=DEFAULT_CONFIG_FILE):
         self.config_file = config_file
@@ -44,36 +39,36 @@ class TelegramConfigManager():
         if not os.path.exists(config_dir):
             os.makedirs(config_dir)
 
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, "w") as f:
             json.dump(self.data, f, ensure_ascii=False, indent=4)
 
     @property
     def api_id(self):
-        return self.data.get('api_id')
+        return self.data.get("api_id")
 
     @api_id.setter
     def api_id(self, value):
-        self.data['api_id'] = value
+        self.data["api_id"] = value
 
     @property
     def api_hash(self):
-        return self.data.get('api_hash')
+        return self.data.get("api_hash")
 
     @api_hash.setter
     def api_hash(self, value):
-        self.data['api_hash'] = value
+        self.data["api_hash"] = value
 
     @property
     def session(self):
-        return self.data.get('session')
+        return self.data.get("session")
 
     @session.setter
     def session(self, value):
-        self.data['session'] = value
+        self.data["session"] = value
 
     @property
     def proxy(self):
-        return self.data.get('proxy')
+        return self.data.get("proxy")
 
     @property
     def download_path(self):
@@ -85,20 +80,20 @@ class TelegramConfigManager():
 
     @property
     def user(self):
-        return self.data.get('user')
+        return self.data.get("user")
 
 
 def get_proxy_from_uri(uri):
     if not uri:
         return None
 
-    if uri.startswith('http://') or uri.startswith('https://'):
-        address, *remain = re.sub(r'^https?://', '', uri).split(':')
+    if uri.startswith("http://") or uri.startswith("https://"):
+        address, *remain = re.sub(r"^https?://", "", uri).split(":")
         port = 80 if len(remain) != 1 else int(remain[0])
         return socks.HTTP, address, port
 
-    if uri.startswith('socks://'):
-        address, *remain = re.sub(r'^socks://', '', uri).split(':')
+    if uri.startswith("socks://"):
+        address, *remain = re.sub(r"^socks://", "", uri).split(":")
         port = 80 if len(remain) != 1 else int(remain[0])
         return socks.SOCKS5, address, port
 
@@ -107,32 +102,32 @@ def get_proxy_from_uri(uri):
 
 class MessageType(Enum):
 
-    TEXT = 1000                    # 文本
-    IMAGE = 1001                   # 图片
-    MULTI = 1002                   # 图文混合
-    WX_TEXT = 2000                 # 微信用户消息
-    WX_IMAGE = 2001                # 微信图片消息
-    WX_ARTICLE = 2002              # 微信公众号文章
-    OTHER = 3000                   # 除上述六种类型外的
+    TEXT = 1000  # 文本
+    IMAGE = 1001  # 图片
+    MULTI = 1002  # 图文混合
+    WX_TEXT = 2000  # 微信用户消息
+    WX_IMAGE = 2001  # 微信图片消息
+    WX_ARTICLE = 2002  # 微信公众号文章
+    OTHER = 3000  # 除上述六种类型外的
 
     @staticmethod
     def from_str(type_name):
         type_map = {
-            'text': MessageType.TEXT,
-            'image': MessageType.IMAGE,
-            'multi': MessageType.MULTI,
-            'wx_text': MessageType.WX_TEXT,
-            'wx_image': MessageType.WX_IMAGE,
-            'wx_article': MessageType.WX_ARTICLE,
-            'other': MessageType.OTHER,
+            "text": MessageType.TEXT,
+            "image": MessageType.IMAGE,
+            "multi": MessageType.MULTI,
+            "wx_text": MessageType.WX_TEXT,
+            "wx_image": MessageType.WX_IMAGE,
+            "wx_article": MessageType.WX_ARTICLE,
+            "other": MessageType.OTHER,
         }
         if type_name in type_map:
             return type_map[type_name]
 
-        raise ValueError('Invalid type name %s' % type_name)
+        raise ValueError("Invalid type name %s" % type_name)
 
 
-class Message():
+class Message:
 
     WX_MSG_TYPES = (MessageType.WX_TEXT, MessageType.WX_IMAGE, MessageType.WX_ARTICLE)
     IMG_MSG_TYPES = (MessageType.IMAGE, MessageType.WX_IMAGE, MessageType.MULTI)
@@ -156,10 +151,10 @@ class Message():
 
     @staticmethod
     def get_chat_name(message):
-        chat_name = ''
-        if hasattr(message.chat, 'title'):
+        chat_name = ""
+        if hasattr(message.chat, "title"):
             chat_name = message.chat.title
-        elif hasattr(message.chat, 'username'):
+        elif hasattr(message.chat, "username"):
             chat_name = message.chat.username
             if not chat_name:
                 chat_name = message.chat.first_name
@@ -172,8 +167,7 @@ class Message():
         if WX_CHANNEL_PREFIX_PATTERN.match(chat_name):
             return Message.get_wx_message_type(message)
 
-        if isinstance(message.photo, Photo) and message.photo.sizes and \
-           not message.entities:
+        if isinstance(message.photo, Photo) and message.photo.sizes and not message.entities:
             if not message.text:
                 return MessageType.IMAGE
             else:
@@ -192,8 +186,11 @@ class Message():
 
     @staticmethod
     def get_wx_message_type(message):
-        if message.entities and len(message.entities) == 2 and \
-           isinstance(message.entities[1], MessageEntityTextUrl):
+        if (
+            message.entities
+            and len(message.entities) == 2
+            and isinstance(message.entities[1], MessageEntityTextUrl)
+        ):
             return MessageType.WX_ARTICLE
 
         if message.media and not message.entities:
@@ -207,18 +204,18 @@ class Message():
     @classmethod
     def parse_wx_text_message(cls, message):
         # FIXME: 未考虑引用的情况
-        user = 'unknown'
-        if message.raw_text.find('\n') >= 0:
-            user, content = message.raw_text.split('\n', maxsplit=1)
+        user = "unknown"
+        if message.raw_text.find("\n") >= 0:
+            user, content = message.raw_text.split("\n", maxsplit=1)
         else:
             matches = WX_GENERAL_AUTHOR_PAT.match(message.raw_text)
             if matches:
-                user = matches.groupdict()['name'].strip()
-                content = message.raw_text.replace(user, '', 1).strip().strip(':')
+                user = matches.groupdict()["name"].strip()
+                content = message.raw_text.replace(user, "", 1).strip().strip(":")
             else:
                 content = message.raw_text
 
-        user = user.replace(WX_ARTICLE_PREFIX, '').strip(': ')
+        user = user.replace(WX_ARTICLE_PREFIX, "").strip(": ")
         content = content.strip(WX_LINK_PREFIX).strip()
         msg_type = MessageType.WX_TEXT
         return cls(message.id, msg_type, content, message.date, user, None, message)
@@ -226,25 +223,24 @@ class Message():
     @classmethod
     def parse_wx_article(cls, message):
         msg_text = message.raw_text.strip()
-        name, title, *desc = msg_text.split('\n')
+        name, title, *desc = msg_text.split("\n")
 
-        name = name.replace(WX_ARTICLE_PREFIX, '').strip(' :')
-        title = title.replace(WX_LINK_PREFIX, '').strip()
+        name = name.replace(WX_ARTICLE_PREFIX, "").strip(" :")
+        title = title.replace(WX_LINK_PREFIX, "").strip()
 
         url = message.entities[1].url
         url_info = urlparse(url)
         parameters = dict(parse_qsl(url_info.query))
-        new_query = urlencode({
-            k: v for k, v in parameters.items()
-            if k in ('__biz', 'mid', 'idx', 'sn')
-        })
-        url = 'http://mp.weixin.qq.com/s?' + new_query
+        new_query = urlencode(
+            {k: v for k, v in parameters.items() if k in ("__biz", "mid", "idx", "sn")}
+        )
+        url = "http://mp.weixin.qq.com/s?" + new_query
 
         content = {
-            'title': title,
-            'desc': '\n'.join(desc),
-            'url': url,
-            'date': str(message.date),
+            "title": title,
+            "desc": "\n".join(desc),
+            "url": url,
+            "date": str(message.date),
         }
 
         msg_type = MessageType.WX_ARTICLE
@@ -263,22 +259,22 @@ class Message():
             else:
                 download_path = TelegramConfigManager.DEFAULT_DOWNLOAD_PATH
 
-            if hasattr(message.chat, 'username'):
+            if hasattr(message.chat, "username"):
                 chat_name = message.chat.username
             else:
                 chat_name = message.chat.title
 
-            content = os.path.join(download_path, f'{chat_name}_{message.id}.jpg')
+            content = os.path.join(download_path, f"{chat_name}_{message.id}.jpg")
 
-            if not message.text or message.text.strip() == 'You:':
-                user = 'You'
+            if not message.text or message.text.strip() == "You:":
+                user = "You"
                 if config and config.user:
                     user = config.user
             else:
                 try:
-                    user = WX_IMAGE_AUTHOR_PAT.match(message.text).groupdict()['name']
-                except Exception:
-                    user = 'unknown'
+                    user = WX_IMAGE_AUTHOR_PAT.match(message.text).groupdict()["name"]
+                except AttributeError:
+                    user = "unknown"
 
             return cls(message.id, msg_type, content, message.date, user, None, message)
 
@@ -293,57 +289,57 @@ class Message():
         content = None
         chat_name = cls.get_chat_name(message)
         if msg_type in (MessageType.TEXT, MessageType.OTHER):
-            content = message.raw_text or ''
+            content = message.raw_text or ""
         elif msg_type in (MessageType.IMAGE, MessageType.MULTI):
             if config:
                 download_path = config.download_path
             else:
                 download_path = TelegramConfigManager.DEFAULT_DOWNLOAD_PATH
 
-            content = os.path.join(download_path,
-                                   f'{chat_name}_{message.id}.jpg')
+            content = os.path.join(download_path, f"{chat_name}_{message.id}.jpg")
             if msg_type == MessageType.MULTI:
                 content = [
                     {
-                        'type': MessageType.IMAGE,
-                        'content': content,
+                        "type": MessageType.IMAGE,
+                        "content": content,
                     },
                     {
-                        'type': MessageType.TEXT,
-                        'content': message.raw_text,
-                    }
+                        "type": MessageType.TEXT,
+                        "content": message.raw_text,
+                    },
                 ]
 
         if message.from_id:
             user = message.client.get_entity(message.from_id).username
         else:
             user = chat_name
-        return cls(message.id, msg_type, content, message.date,
-                   user, message.reply_to_msg_id, message)
+        return cls(
+            message.id, msg_type, content, message.date, user, message.reply_to_msg_id, message
+        )
 
     def to_dict(self):
         data = {
-            'id': self.id,
-            'type': self.type.value,
-            'content': self.content,
-            'timestamp': str(self.timestamp),
-            'user': self.user,
-            'reply_to': self.reply_to,
+            "id": self.id,
+            "type": self.type.value,
+            "content": self.content,
+            "timestamp": str(self.timestamp),
+            "user": self.user,
+            "reply_to": self.reply_to,
         }
         if self.type == MessageType.MULTI:
-            for item in data['content']:
-                item['type'] = item['type'].value
+            for item in data["content"]:
+                item["type"] = item["type"].value
         return data
 
 
-class TelegramClient():
+class TelegramClient:
 
     IGNORED_MSG_PATTERNS = [
-        re.compile(r'WeChat Slave'),
-        re.compile(r'tele_wechat_bot'),
-        re.compile(r'^/'),
-        re.compile(r'System'),
-        re.compile(r'^Cancelled'),
+        re.compile(r"WeChat Slave"),
+        re.compile(r"tele_wechat_bot"),
+        re.compile(r"^/"),
+        re.compile(r"System"),
+        re.compile(r"^Cancelled"),
     ]
 
     def __init__(self, config_manager=None):
@@ -363,21 +359,24 @@ class TelegramClient():
                 config_manager.save()
 
         # sync 模式下这里要加一个 start()，去掉的话会触发 ConnectionError 异常
-        self.client = TelethonClient(StringSession(config_manager.session),
-                                     config_manager.api_id,
-                                     config_manager.api_hash,
-                                     proxy=proxy).start()
+        self.client = TelethonClient(
+            StringSession(config_manager.session),
+            config_manager.api_id,
+            config_manager.api_hash,
+            proxy=proxy,
+        ).start()
         self.config_manager = config_manager
 
     @staticmethod
     def ask_base_info():
-        print('Create your application on `https://my.telegram.org`, '
-              'then enter api_id and api_hash below:')
-        api_id = input('App api_id').strip()
-        api_hash = input('App api_hash').strip()
+        print(
+            "Create your application on `https://my.telegram.org`, "
+            "then enter api_id and api_hash below:"
+        )
+        api_id = input("App api_id").strip()
+        api_hash = input("App api_hash").strip()
         return api_id, api_hash
 
-    @lru_cache()
     def get_dialog(self, name):
         for dialog in self.client.get_dialogs():
             if dialog.name == name:
@@ -385,8 +384,9 @@ class TelegramClient():
 
         return None
 
-    def fetch_messages(self, name, start=None, batch=100, limit=None, msg_type=None,
-                       verbose=False):
+    def fetch_messages(
+        self, name, start=None, batch=100, limit=None, msg_type=None, verbose=False
+    ):
         """获取某个频道或群组的聊天记录
 
         Parameters
@@ -419,9 +419,7 @@ class TelegramClient():
         while True:
             if offset_id:
                 message_packages = self.client.iter_messages(
-                    dialog.entity,
-                    limit=batch_size,
-                    offset_id=offset_id
+                    dialog.entity, limit=batch_size, offset_id=offset_id
                 )
                 last_offset_id = offset_id
             else:
@@ -433,12 +431,14 @@ class TelegramClient():
             msg_timestamp = None
             for message in message_packages:
                 if cnt > 0 and verbose:
-                    LOGGER.info("processed %d messages and got %d valid messages",
-                                cnt, len(results))
+                    LOGGER.info(
+                        "processed %d messages and got %d valid messages", cnt, len(results)
+                    )
 
                 cnt += 1
-                if isinstance(message.raw_text, str) and \
-                   any(pat.findall(message.raw_text) for pat in self.IGNORED_MSG_PATTERNS):
+                if isinstance(message.raw_text, str) and any(
+                    pat.findall(message.raw_text) for pat in self.IGNORED_MSG_PATTERNS
+                ):
                     continue
 
                 offset_id = message.id
@@ -474,8 +474,8 @@ class TelegramClient():
         if isinstance(message.content, str):
             photo = message.content
         elif isinstance(message.content, list):
-            if message.content[0]['type'] == MessageType.IMAGE:
-                photo = message.content[0]['content']
+            if message.content[0]["type"] == MessageType.IMAGE:
+                photo = message.content[0]["content"]
 
         if not photo or os.path.exists(photo):
             return

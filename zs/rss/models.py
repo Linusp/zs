@@ -1,21 +1,21 @@
-import os
 import datetime
+import os
 
 from peewee import (
-    SqliteDatabase,
-    Model,
+    AutoField,
     CharField,
     DateTimeField,
-    AutoField,
-    TextField,
     ForeignKeyField,
+    Model,
+    SqliteDatabase,
+    TextField,
 )
 
-DB_DIR = os.path.join(os.environ.get('HOME'), '.zs/data/db')
+DB_DIR = os.path.join(os.environ.get("HOME"), ".zs/data/db")
 if not os.path.exists(DB_DIR):
     os.makedirs(DB_DIR)
 
-DATABASE = SqliteDatabase(os.path.join(DB_DIR, 'rss.db'))
+DATABASE = SqliteDatabase(os.path.join(DB_DIR, "rss.db"))
 
 
 class BaseModel(Model):
@@ -41,7 +41,7 @@ class WechatArticle(BaseModel):
 
         if limit:
             search = search.order_by(cls.date.desc()).limit(limit)
-            items = sorted(list(search), key=lambda item: item.date)
+            items = sorted(search, key=lambda item: item.date)
             return items
 
         search = search.order_by(cls.date)
@@ -49,11 +49,11 @@ class WechatArticle(BaseModel):
 
     def to_dict(self):
         return {
-            'name': self.name,
-            'title': self.title,
-            'desc': self.description,
-            'url': self.url,
-            'date': str(self.date),
+            "name": self.name,
+            "title": self.title,
+            "desc": self.description,
+            "url": self.url,
+            "date": str(self.date),
         }
 
 
@@ -83,7 +83,7 @@ class Feed(BaseModel):
 class Article(BaseModel):
     """记录通用 RSS 条目数据"""
 
-    feed = ForeignKeyField(Feed, backref='articles')
+    feed = ForeignKeyField(Feed, backref="articles")
     title = CharField(index=True)
     summary = TextField()
     link = CharField(index=True, unique=True)
@@ -99,7 +99,7 @@ class Article(BaseModel):
 
         if limit:
             search = search.order_by(cls.publish_date.desc()).limit(limit)
-            items = sorted(list(search), key=lambda item: item.publish_date)
+            items = sorted(search, key=lambda item: item.publish_date)
             return items
 
         return search
