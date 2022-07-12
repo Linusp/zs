@@ -15,7 +15,7 @@ REQS = [
     'feedparser',
     'tabulate',
     'lxml',
-    'PyExecJS',
+    'pydantic',
 ]
 
 

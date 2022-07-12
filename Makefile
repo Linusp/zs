@@ -13,12 +13,3 @@ clean:
 
 venv:
 	- virtualenv --python=$(shell which python3) --prompt '<venv:zs>' venv
-
-
-lock-requirements:
-	- pip install pip-tools
-	- pip-compile --output-file requirements.txt requirements.in
-
-deps:
-	- pip install -U pip setuptools
-	- pip install -r requirements.txt
