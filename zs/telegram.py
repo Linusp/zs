@@ -127,6 +127,14 @@ class MessageType(Enum):
         raise ValueError("Invalid type name %s" % type_name)
 
 
+def clean_user_name(user_name):
+    user_name = re.sub(r"\[[^\[\]]+\]$", "", user_name)
+    user_name = user_name.replace(WX_ARTICLE_PREFIX, "").strip(": ")
+    user_name = user_name.replace(WX_LINK_PREFIX, "").strip()
+    user_name = user_name.replace("💬👥", "").strip()
+    return user_name
+
+
 class Message:
 
     WX_MSG_TYPES = (MessageType.WX_TEXT, MessageType.WX_IMAGE, MessageType.WX_ARTICLE)
@@ -215,6 +223,7 @@ class Message:
             else:
                 content = message.raw_text
 
+        user = clean_user_name(user)
         user = user.replace(WX_ARTICLE_PREFIX, "").strip(": ")
         content = content.strip(WX_LINK_PREFIX).strip()
         msg_type = MessageType.WX_TEXT
