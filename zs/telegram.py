@@ -204,7 +204,7 @@ class Message:
         if message.media and not message.entities:
             if isinstance(message.photo, Photo):
                 return MessageType.WX_IMAGE
-        else:
+        elif message.raw_text is not None:
             return MessageType.WX_TEXT
 
         return MessageType.OTHER
