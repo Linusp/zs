@@ -293,7 +293,7 @@ class Message:
             else:
                 download_path = TelegramConfigManager.DEFAULT_DOWNLOAD_PATH
 
-            if hasattr(message.chat, "username"):
+            if hasattr(message.chat, "username") and message.chat.username:
                 chat_name = message.chat.username
             else:
                 chat_name = message.chat.title
@@ -307,7 +307,7 @@ class Message:
             else:
                 try:
                     user = WX_IMAGE_AUTHOR_PAT.match(message.text).groupdict()["name"]
-                except AttributeError:
+                except Exception:  # noqa
                     user = "unknown"
 
             return cls(message.id, msg_type, content, message.date, user, None, message)
