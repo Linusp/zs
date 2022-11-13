@@ -425,7 +425,15 @@ class TelegramClient:
         return None
 
     def fetch_messages(
-        self, name, start=None, batch=100, limit=None, msg_type=None, verbose=False
+        self,
+        name,
+        start=None,
+        end=None,
+        offset_id=None,
+        batch=100,
+        limit=None,
+        msg_type=None,
+        verbose=False,
     ):
         """获取某个频道或群组的聊天记录
 
@@ -435,6 +443,10 @@ class TelegramClient:
             要获取的频道或群组的名字
         start: datetime
             消息的起始时间，早于该时间的消息将会被忽略，默认不设置取所有消息
+        end: datetime
+            消息的结束时间，晚于该时间的消息将会被忽略，默认不设置取所有消息
+        offset_id: int
+            TODO
         batch: int
             获取消息时为减少网络开销，将会一批一批获取，该参数用于设置每个批次的
             最大消息数量，默认设置为 100
@@ -455,7 +467,7 @@ class TelegramClient:
 
         results, cnt = [], 0
         batch_size = batch if not limit else min(limit, batch)
-        last_offset_id, offset_id = None, None
+        last_offset_id = None
         while True:
             if offset_id:
                 message_packages = self.client.iter_messages(
@@ -486,11 +498,14 @@ class TelegramClient:
                 offset_id = message.id
                 msg = Message.parse(message, config=self.config_manager)
                 msg_timestamp = message.date
-                if not msg.content:
-                    continue
-
                 if start and msg.timestamp < start:
                     break
+
+                if end and msg.timestamp >= end:
+                    continue
+
+                if not msg.content:
+                    continue
 
                 if not msg_type or msg.type == MessageType.from_str(msg_type):
                     results.append(msg)
