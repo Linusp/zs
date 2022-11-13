@@ -213,8 +213,33 @@ class Message:
     def parse_wx_text_message(cls, message):
         # FIXME: 未考虑引用的情况
         user = "unknown"
-        if message.raw_text.find("\n") >= 0:
-            user, content = message.raw_text.split("\n", maxsplit=1)
+        if message.raw_text.endswith("You:"):
+            user = "You"
+            content = message.raw_text.replace("You:", "").strip()
+        elif message.raw_text.startswith("Error: Empty Sticker received"):
+            content = message.raw_text
+        elif message.raw_text.find("\n") >= 0:
+            lines = message.raw_text.split("\n")
+            possible_users = []
+            for line in lines:
+                matches = WX_GENERAL_AUTHOR_PAT.match(line)
+                if matches:
+                    possible_users.append(matches.groupdict()["name"].strip())
+                else:
+                    possible_users.append(None)
+
+            if len(set(possible_users)) == 1 and possible_users[0] is not None:
+                user = possible_users[0]
+                content = "\n".join(
+                    [line.replace(user, "", 1).strip().strip(":") for line in lines]
+                )
+            else:
+                matches = WX_GENERAL_AUTHOR_PAT.match(message.raw_text)
+                if matches:
+                    user = matches.groupdict()["name"].strip()
+                    content = message.raw_text.replace(user, "", 1).strip().strip(":")
+                else:
+                    user, content = message.raw_text.split("\n", maxsplit=1)
         else:
             matches = WX_GENERAL_AUTHOR_PAT.match(message.raw_text)
             if matches:
