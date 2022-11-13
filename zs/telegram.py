@@ -314,7 +314,13 @@ class Message:
         else:
             user = chat_name
         return cls(
-            message.id, msg_type, content, message.date, user, message.reply_to_msg_id, message
+            message.id,
+            msg_type,
+            content,
+            message.date,
+            user,
+            message.reply_to_msg_id,
+            message,
         )
 
     def to_dict(self):
@@ -432,7 +438,9 @@ class TelegramClient:
             for message in message_packages:
                 if cnt > 0 and verbose:
                     LOGGER.info(
-                        "processed %d messages and got %d valid messages", cnt, len(results)
+                        "processed %d messages and got %d valid messages",
+                        cnt,
+                        len(results),
                     )
 
                 cnt += 1

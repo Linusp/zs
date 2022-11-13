@@ -118,7 +118,11 @@ def fetch_wx_articles(name, date, limit, verbose):
         published_date = msg.timestamp
         name = msg.user
         _, created = WechatArticle.get_or_create(
-            name=name, title=title, description=description, url=url, date=published_date
+            name=name,
+            title=title,
+            description=description,
+            url=url,
+            date=published_date,
         )
 
         processed_cnt += 1
