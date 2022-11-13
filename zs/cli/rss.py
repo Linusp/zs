@@ -118,7 +118,11 @@ def fetch_wx_articles(name, date, limit, verbose):
         published_date = msg.timestamp
         name = msg.user
         _, created = WechatArticle.get_or_create(
-            name=name, title=title, description=description, url=url, date=published_date
+            name=name,
+            title=title,
+            description=description,
+            url=url,
+            date=published_date,
         )
 
         processed_cnt += 1
@@ -290,36 +294,40 @@ def list_feeds():
 
 
 @main.command("fetch-rss")
-@click.option("-n", "--name", required=True, help="feed 名字")
-def fetch_rss_articles(name):
+@click.option("-n", "--names", required=True, help="feed 名字")
+def fetch_rss_articles(names):
     """获取 RSS 并写入数据库中"""
     from zs.rss.models import Article, Feed
 
-    feed = Feed.get_or_none(Feed.name == name)
-    if not feed:
-        click.secho(f"Feed is not found: {name}", fg="red")
-        return -1
-
-    feed_url = feed.feed_link
-    feed_data = feedparser.parse(feed_url)
+    names = [n.strip() for n in names.split(",") if n.strip()]
     created_cnt = 0
-    for entry in feed_data["entries"]:
-        publish_date = None
-        if entry.get("published_parsed"):
-            publish_date = datetime.datetime.fromtimestamp(mktime(entry.get("published_parsed")))
-        else:
-            publish_date = datetime.datetime.now()
+    for name in names:
+        feed = Feed.get_or_none(Feed.name == name)
+        if not feed:
+            click.secho(f"Feed is not found: {name}", fg="red")
+            return -1
 
-        query = Article.select().where(Article.link == entry["link"])
-        if not query.exists():
-            Article.create(
-                title=entry["title"],
-                link=entry["link"],
-                summary=entry.get("summary") or entry.get("content") or "",
-                feed=feed,
-                publish_date=publish_date,
-            )
-            created_cnt += 1
+        feed_url = feed.feed_link
+        feed_data = feedparser.parse(feed_url)
+        for entry in feed_data["entries"]:
+            publish_date = None
+            if entry.get("published_parsed"):
+                publish_date = datetime.datetime.fromtimestamp(
+                    mktime(entry.get("published_parsed"))
+                )
+            else:
+                publish_date = datetime.datetime.now()
+
+            query = Article.select().where(Article.link == entry["link"])
+            if not query.exists():
+                Article.create(
+                    title=entry["title"],
+                    link=entry["link"],
+                    summary=entry.get("summary") or entry.get("content") or "",
+                    feed=feed,
+                    publish_date=publish_date,
+                )
+                created_cnt += 1
 
     click.secho(f"fetched {created_cnt} new articles")
 

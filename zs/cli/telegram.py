@@ -39,21 +39,33 @@ def main():
 
 @main.command("fetch-msgs")
 @click.option("-n", "--name", required=True, help="聊天名称，可为群组、频道、用户名")
-@click.option("-d", "--date", default=str(datetime.date.today()))
+@click.option("--begin-date", default=str(datetime.date.today()))
+@click.option("--end-date", default=str(datetime.date.today() + datetime.timedelta(days=1)))
+@click.option("--offset-id", type=int)
 @click.option("-l", "--limit", type=int, default=100)
 @click.option("-o", "--outfile", required=True)
 @click.option("-t", "--message-type")
 @click.option("-v", "--verbose", is_flag=True)
-def fetch_msgs(name, date, limit, outfile, message_type, verbose):
+def fetch_msgs(name, begin_date, end_date, offset_id, limit, outfile, message_type, verbose):
     """获取某个聊天的消息记录"""
     client = TelegramClient()
 
-    start = datetime.datetime.strptime(date, "%Y-%m-%d")
+    start = datetime.datetime.strptime(begin_date, "%Y-%m-%d")
     start = start.replace(tzinfo=tz.tzlocal()).astimezone(datetime.timezone.utc)
+
+    end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+    end = end.replace(tzinfo=tz.tzlocal()).astimezone(datetime.timezone.utc)
+
     messages = [
         msg.to_dict()
         for msg in client.fetch_messages(
-            name, start=start, limit=limit, msg_type=message_type, verbose=verbose
+            name,
+            start=start,
+            end=end,
+            limit=limit,
+            offset_id=offset_id,
+            msg_type=message_type,
+            verbose=verbose,
         )
     ]
     with open(outfile, "w") as fout:

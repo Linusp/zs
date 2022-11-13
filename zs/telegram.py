@@ -127,6 +127,14 @@ class MessageType(Enum):
         raise ValueError("Invalid type name %s" % type_name)
 
 
+def clean_user_name(user_name):
+    user_name = re.sub(r"\[[^\[\]]+\]$", "", user_name)
+    user_name = user_name.replace(WX_ARTICLE_PREFIX, "").strip(": ")
+    user_name = user_name.replace(WX_LINK_PREFIX, "").strip()
+    user_name = user_name.replace("💬👥", "").strip()
+    return user_name
+
+
 class Message:
 
     WX_MSG_TYPES = (MessageType.WX_TEXT, MessageType.WX_IMAGE, MessageType.WX_ARTICLE)
@@ -196,7 +204,7 @@ class Message:
         if message.media and not message.entities:
             if isinstance(message.photo, Photo):
                 return MessageType.WX_IMAGE
-        else:
+        elif message.raw_text is not None:
             return MessageType.WX_TEXT
 
         return MessageType.OTHER
@@ -205,8 +213,33 @@ class Message:
     def parse_wx_text_message(cls, message):
         # FIXME: 未考虑引用的情况
         user = "unknown"
-        if message.raw_text.find("\n") >= 0:
-            user, content = message.raw_text.split("\n", maxsplit=1)
+        if message.raw_text.endswith("You:"):
+            user = "You"
+            content = message.raw_text.replace("You:", "").strip()
+        elif message.raw_text.startswith("Error: Empty Sticker received"):
+            content = message.raw_text
+        elif message.raw_text.find("\n") >= 0:
+            lines = message.raw_text.split("\n")
+            possible_users = []
+            for line in lines:
+                matches = WX_GENERAL_AUTHOR_PAT.match(line)
+                if matches:
+                    possible_users.append(matches.groupdict()["name"].strip())
+                else:
+                    possible_users.append(None)
+
+            if len(set(possible_users)) == 1 and possible_users[0] is not None:
+                user = possible_users[0]
+                content = "\n".join(
+                    [line.replace(user, "", 1).strip().strip(":") for line in lines]
+                )
+            else:
+                matches = WX_GENERAL_AUTHOR_PAT.match(message.raw_text)
+                if matches:
+                    user = matches.groupdict()["name"].strip()
+                    content = message.raw_text.replace(user, "", 1).strip().strip(":")
+                else:
+                    user, content = message.raw_text.split("\n", maxsplit=1)
         else:
             matches = WX_GENERAL_AUTHOR_PAT.match(message.raw_text)
             if matches:
@@ -215,6 +248,7 @@ class Message:
             else:
                 content = message.raw_text
 
+        user = clean_user_name(user)
         user = user.replace(WX_ARTICLE_PREFIX, "").strip(": ")
         content = content.strip(WX_LINK_PREFIX).strip()
         msg_type = MessageType.WX_TEXT
@@ -259,7 +293,7 @@ class Message:
             else:
                 download_path = TelegramConfigManager.DEFAULT_DOWNLOAD_PATH
 
-            if hasattr(message.chat, "username"):
+            if hasattr(message.chat, "username") and message.chat.username:
                 chat_name = message.chat.username
             else:
                 chat_name = message.chat.title
@@ -273,7 +307,7 @@ class Message:
             else:
                 try:
                     user = WX_IMAGE_AUTHOR_PAT.match(message.text).groupdict()["name"]
-                except AttributeError:
+                except Exception:  # noqa
                     user = "unknown"
 
             return cls(message.id, msg_type, content, message.date, user, None, message)
@@ -314,7 +348,13 @@ class Message:
         else:
             user = chat_name
         return cls(
-            message.id, msg_type, content, message.date, user, message.reply_to_msg_id, message
+            message.id,
+            msg_type,
+            content,
+            message.date,
+            user,
+            message.reply_to_msg_id,
+            message,
         )
 
     def to_dict(self):
@@ -385,7 +425,15 @@ class TelegramClient:
         return None
 
     def fetch_messages(
-        self, name, start=None, batch=100, limit=None, msg_type=None, verbose=False
+        self,
+        name,
+        start=None,
+        end=None,
+        offset_id=None,
+        batch=100,
+        limit=None,
+        msg_type=None,
+        verbose=False,
     ):
         """获取某个频道或群组的聊天记录
 
@@ -395,6 +443,10 @@ class TelegramClient:
             要获取的频道或群组的名字
         start: datetime
             消息的起始时间，早于该时间的消息将会被忽略，默认不设置取所有消息
+        end: datetime
+            消息的结束时间，晚于该时间的消息将会被忽略，默认不设置取所有消息
+        offset_id: int
+            TODO
         batch: int
             获取消息时为减少网络开销，将会一批一批获取，该参数用于设置每个批次的
             最大消息数量，默认设置为 100
@@ -415,7 +467,7 @@ class TelegramClient:
 
         results, cnt = [], 0
         batch_size = batch if not limit else min(limit, batch)
-        last_offset_id, offset_id = None, None
+        last_offset_id = None
         while True:
             if offset_id:
                 message_packages = self.client.iter_messages(
@@ -432,7 +484,9 @@ class TelegramClient:
             for message in message_packages:
                 if cnt > 0 and verbose:
                     LOGGER.info(
-                        "processed %d messages and got %d valid messages", cnt, len(results)
+                        "processed %d messages and got %d valid messages",
+                        cnt,
+                        len(results),
                     )
 
                 cnt += 1
@@ -444,11 +498,14 @@ class TelegramClient:
                 offset_id = message.id
                 msg = Message.parse(message, config=self.config_manager)
                 msg_timestamp = message.date
-                if not msg.content:
-                    continue
-
                 if start and msg.timestamp < start:
                     break
+
+                if end and msg.timestamp >= end:
+                    continue
+
+                if not msg.content:
+                    continue
 
                 if not msg_type or msg.type == MessageType.from_str(msg_type):
                     results.append(msg)

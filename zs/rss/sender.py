@@ -97,14 +97,20 @@ class SlackIncomingSender(Sender):
 
         blocks, links = [], []
         blocks.append(
-            {"type": "section", "text": {"type": "mrkdwn", "text": f"from: *{article.feed.name}*"}}
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": f"from: *{article.feed.name}*"},
+            }
         )
         if "title" in self.content:
             links.extend(self.extract_links(article.title))
             blocks.append(
                 {
                     "type": "section",
-                    "text": {"type": "mrkdwn", "text": self.convert_html(article.title)},
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": self.convert_html(article.title),
+                    },
                 }
             )
 
@@ -113,7 +119,10 @@ class SlackIncomingSender(Sender):
             blocks.append(
                 {
                     "type": "section",
-                    "text": {"type": "mrkdwn", "text": self.convert_html(article.summary)},
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": self.convert_html(article.summary),
+                    },
                 }
             )
 
