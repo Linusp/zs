@@ -11,5 +11,9 @@ clean:
 	- rm .coverage -f
 	- rm .pytest_cache/ -rf
 
+lock-requirements:
+	- pip install pip-tools -q
+	- pip-compile -o requirements.txt
+
 venv:
 	- virtualenv --python=$(shell which python3) --prompt '<venv:zs>' venv

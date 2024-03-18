@@ -1,0 +1,3 @@
+include zs/rss/kz_scenario_template.json
+include zs/rss/efb_scenario_template.json
+include zs/rss/daily_digest_rss.json
