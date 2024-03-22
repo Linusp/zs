@@ -24,7 +24,6 @@ class BaseModel(Model):
 
 
 class WechatArticle(BaseModel):
-
     """存储微信公众号文章的基本信息"""
 
     name = CharField(index=True)

@@ -28,8 +28,7 @@ class Sender(ABC):
         self.content = content or ["title", "images"]
 
     @abstractmethod
-    def prepare_data(self, article):
-        ...
+    def prepare_data(self, article): ...
 
     def send(self, article):
         data = self.prepare_data(article)
@@ -42,7 +41,6 @@ class Sender(ABC):
 
 @register_sender("slack_incoming")
 class SlackIncomingSender(Sender):
-
     IMG_PATTERN = re.compile(r"<img.*?src=\"(.*?)\"(?: ?/)?>")
 
     def __init__(self, dest_url, **kwargs):
