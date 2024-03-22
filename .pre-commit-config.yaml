@@ -18,30 +18,17 @@ repos:
               ^.pytest_cache/
           )
 
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.13.2
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.3.3
     hooks:
-      - id: isort
-
-  - repo: https://github.com/PyCQA/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        additional_dependencies:
-          - flake8-blind-except
-          - flake8-bugbear
-          - flake8-comprehensions
-          # - flake8-datetimez
-          - flake8-debugger
-          # - flake8-logging-format
-          # - flake8-print
-          - flake8-pytest-style
-          - flake8-tidy-imports
+      - id: ruff
+        args: [ --fix ]
+      - id: ruff-format
 
   - repo: https://github.com/codespell-project/codespell
     rev: v2.2.6
     hooks:
       - id: codespell
         name: codespell
-        entry: codespell -q 3 -S "*.lock" -I codespell-ignore-words.txt --regex="[a-zA-Z0-9\-'’`]+"
+        entry: codespell -q 3 -S "*.lock" --regex="[a-zA-Z0-9\-'’`]+"
         types: [text]
