@@ -24,7 +24,6 @@ WX_GENERAL_AUTHOR_PAT = re.compile(r"^(?P<name>.+):[\n ]+")
 
 
 class TelegramConfigManager:
-
     DEFAULT_DOWNLOAD_PATH = os.path.join(DATA_DIR, "telegram")
 
     def __init__(self, config_file=DEFAULT_CONFIG_FILE):
@@ -101,7 +100,6 @@ def get_proxy_from_uri(uri):
 
 
 class MessageType(Enum):
-
     TEXT = 1000  # 文本
     IMAGE = 1001  # 图片
     MULTI = 1002  # 图文混合
@@ -136,7 +134,6 @@ def clean_user_name(user_name):
 
 
 class Message:
-
     WX_MSG_TYPES = (MessageType.WX_TEXT, MessageType.WX_IMAGE, MessageType.WX_ARTICLE)
     IMG_MSG_TYPES = (MessageType.IMAGE, MessageType.WX_IMAGE, MessageType.MULTI)
 
@@ -373,7 +370,6 @@ class Message:
 
 
 class TelegramClient:
-
     IGNORED_MSG_PATTERNS = [
         re.compile(r"WeChat Slave"),
         re.compile(r"tele_wechat_bot"),

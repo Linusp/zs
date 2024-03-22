@@ -130,32 +130,32 @@ def init_pyrepo(repo_name, python_version):
 
 def fetch_bili_history(cookies, page_num=10, page_size=100, delay=1.0):
     headers = {
-        'Connection': 'keep-alive',
-        'Host': 'api.bilibili.com',
-        'Referer': 'https://www.bilibili.com/account/history',
-        'User-Agent': (
-            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:90.0) ' 'Gecko/20100101 Firefox/90.0'
+        "Connection": "keep-alive",
+        "Host": "api.bilibili.com",
+        "Referer": "https://www.bilibili.com/account/history",
+        "User-Agent": (
+            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:90.0) " "Gecko/20100101 Firefox/90.0"
         ),
     }
     session = requests.Session()
-    url = 'https://api.bilibili.com/x/v2/history'
-    params = {'pn': 0, 'ps': page_size, 'jsonp': 'jsonp'}
+    url = "https://api.bilibili.com/x/v2/history"
+    params = {"pn": 0, "ps": page_size, "jsonp": "jsonp"}
     history = []
     for page in range(page_num):
-        params['pn'] = page
+        params["pn"] = page
         resp = session.get(url, params=params, headers=headers, cookies=cookies)
         if resp.status_code != 200:
             LOGGER.error("bad response: %s(%s)", resp.reason, resp.status_code)
             break
 
         result = resp.json()
-        if result.get('code') != 0 or not result.get('data'):
+        if result.get("code") != 0 or not result.get("data"):
             LOGGER.error("bad response: %s", result)
             break
 
-        history.extend(result['data'])
+        history.extend(result["data"])
         if page < page_num - 1:
-            LOGGER.info("fetched %d items", len(result['data']))
+            LOGGER.info("fetched %d items", len(result["data"]))
             time.sleep(delay)
 
     return history
@@ -177,21 +177,21 @@ def get_bili_history(cookie_file, outfile, page_size, page_num, delay):
         with open(outfile) as f:
             origin = json.load(f)
 
-        id2item = {(item['kid'], item['view_at']): item for item in origin}
+        id2item = {(item["kid"], item["view_at"]): item for item in origin}
         for item in history:
-            if (item['kid'], item['view_at']) in id2item:
+            if (item["kid"], item["view_at"]) in id2item:
                 continue
 
             origin.append(item)
 
-        origin.sort(key=itemgetter('view_at'))
-        with open(outfile, 'w') as fout:
+        origin.sort(key=itemgetter("view_at"))
+        with open(outfile, "w") as fout:
             json.dump(origin, fout, ensure_ascii=False, indent=2)
     else:
-        history.sort(key=itemgetter('view_at'))
-        with open(outfile, 'w') as fout:
+        history.sort(key=itemgetter("view_at"))
+        with open(outfile, "w") as fout:
             json.dump(history, fout, ensure_ascii=False, indent=2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
